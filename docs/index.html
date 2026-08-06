@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>¿Lo quiero? — Decide antes de comprar</title>
+  <meta name="description" content="Aplicación web personal para reflexionar antes de comprar: periodo de espera, cuestionario, alternativas, inventario y estadísticas.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="brand">
+        <span class="brand-title">¿Lo quiero?</span>
+        <span class="brand-sub">Decide antes de comprar.</span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="#que-hace">Qué hace</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#poner-en-marcha">Ponerla en marcha</a>
+        <a href="https://github.com/Marinafabregat/lo-quiero" class="btn btn-primary">Ver en GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>¿De verdad lo quieres?</h1>
+        <p class="lead">
+          Una aplicación web <strong>personal</strong> para guardar lo que te planteas
+          comprar, imponerte un periodo de reflexión y decidir con calma si lo
+          compras, lo pospones o lo descartas.
+        </p>
+        <div class="hero-actions">
+          <a href="#poner-en-marcha" class="btn btn-primary">Ponerla en marcha</a>
+          <a href="#que-hace" class="btn btn-secondary">Qué hace</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="que-hace">
+      <div class="container">
+        <h2 class="section-title">Qué hace</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Periodo de reflexión</h3>
+            <p>
+              Sugiere una espera según el precio: 7, 15, 30 o 45 días. Puedes
+              ajustarla a mano, pero el plazo existe para que no compres a impulsos.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Cuestionario de revisión</h3>
+            <p>
+              Cuando llega la fecha, respondes 10 preguntas y puntúas necesidad,
+              valor e interés. El historial queda guardado y nunca se sobrescribe.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Recomendación orientativa</h3>
+            <p>
+              Con tu última revisión, la app te orienta sobre si merece la pena:
+              una recomendación, no una decisión automática.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Alternativas y «dupes»</h3>
+            <p>
+              Añade alternativas más baratas y compáralas con el original: diferencia
+              de precio, ahorro, similitud, calidad, durabilidad y garantía.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Inventario</h3>
+            <p>
+              Registra lo que ya tienes. Si vas a comprar algo de una categoría que
+              ya cubres, la app te lo recuerda.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Historial de precios</h3>
+            <p>
+              Apunta los precios con el tiempo para ver si el producto baja de
+              precio antes de decidir.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Decisiones claras</h3>
+            <p>
+              Marca cada producto como comprado, descartado o pospón la revisión.
+              Nada se borra: todo queda registrado.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Estadísticas</h3>
+            <p>
+              Consulta cuánto has gastado, cuánto has evitado gastar, categorías y
+              tiempos medios de decisión.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section-alt">
+      <div class="container">
+        <h2 class="section-title">Cómo funciona</h2>
+        <div class="steps">
+          <div class="step">
+            <span class="step-num">1</span>
+            <div>
+              <h3>Añades el producto</h3>
+              <p>
+                Con precio, categoría, motivo y prioridad. La app sugiere un periodo
+                de espera según el precio.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <div>
+              <h3>Esperas</h3>
+              <p>
+                Mientras tanto comparas alternativas, revisas el historial de precios
+                y compruebas si ya tienes algo parecido.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <div>
+              <h3>Revisas</h3>
+              <p>
+                En la fecha de revisión respondes el cuestionario y puntúas necesidad,
+                valor e interés.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">4</span>
+            <div>
+              <h3>Decides</h3>
+              <p>
+                Con la recomendación en la mano: comprar, posponer o descartar. Sin
+                arrepentimientos ni compras por impulso.
+              </p>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          Espera sugerida por precio: menos de 15&nbsp;€ → 7 días · menos de 35&nbsp;€ →
+          15 días · menos de 50&nbsp;€ → 30 días · 50&nbsp;€ o más → 45 días.
+        </p>
+      </div>
+    </section>
+
+    <section id="poner-en-marcha">
+      <div class="container">
+        <h2 class="section-title">Ponerla en marcha</h2>
+        <p>
+          La forma más sencilla es con <strong>Docker</strong>. Necesitas
+          <a href="https://www.docker.com/products/docker-desktop/" class="link">Docker Desktop</a>
+          (o Docker con Compose) y ejecutar tres comandos:
+        </p>
+
+        <pre><code><span class="c-comment"># 1. Descarga el proyecto</span>
+git clone https://github.com/Marinafabregat/lo-quiero.git
+cd lo-quiero
+
+<span class="c-comment"># 2. Construye y arranca (la primera vez tarda unos minutos)</span>
+docker compose up --build
+
+<span class="c-comment"># 3. Abre la aplicación</span>
+<span class="c-comment"># http://localhost:8000</span></code></pre>
+
+        <p class="note">
+          Las migraciones de la base de datos se aplican automáticamente al arrancar.
+          Tus datos se guardan en la carpeta <code class="inline-code">./data</code> y
+          sobreviven a <code class="inline-code">docker compose down</code>.
+        </p>
+
+        <h3 class="sub-title">Datos de demostración</h3>
+        <p>
+          Para verla con contenido de ejemplo (productos, revisiones, inventario y el
+          panel de administración con usuario <strong>admin</strong>):
+        </p>
+        <pre><code>docker compose exec web python manage.py seed_demo</code></pre>
+
+        <p class="note">
+          Si experimentas y quieres empezar de cero, añade <code class="inline-code">--reset</code>
+          al comando. Cuidado: borra todos los datos.
+        </p>
+
+        <h3 class="sub-title">Panel de administración</h3>
+        <p>
+          Está en <code class="inline-code">http://localhost:8000/admin</code>. Tras ejecutar
+          <code class="inline-code">seed_demo</code> entra con <strong>admin / admin</strong>.
+          Por ser una app local de un solo usuario se comparte esa contraseña por defecto:
+          cámbiala cuando empieces a usarla.
+        </p>
+        <pre><code>docker compose exec web python manage.py changepassword admin</code></pre>
+
+        <h3 class="sub-title">Alternativa sin Docker</h3>
+        <p>
+          Con Python 3.12: crea un entorno virtual, instala las dependencias y lanza el
+          servidor de desarrollo. La configuración genera una clave secreta propia por
+          instalación, así que el repositorio no guarda ninguna.
+        </p>
+        <pre><code>python -m venv .venv
+.venv\Scripts\activate        <span class="c-comment"># Windows</span>
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo
+python manage.py runserver</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>¿Lo quiero? — Decide antes de comprar. Aplicación personal para uso local.</p>
+      <p>
+        <a href="https://github.com/Marinafabregat/lo-quiero" class="link">Repositorio en GitHub</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

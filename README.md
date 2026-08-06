@@ -2,6 +2,8 @@
 
 Decide antes de comprar.
 
+> 🌐 Página de presentación: <https://marinafabregat.github.io/lo-quiero/>
+
 Aplicación web **personal** para reflexionar antes de comprar: guarda productos, establece un periodo obligatorio de reflexión, responde un cuestionario, compara alternativas o «dupes», registra los objetos que ya tienes y decide si compras, pospones o descartas.
 
 > Uso local para **un único usuario**, sin registro ni autenticación. La base de datos es SQLite y se guarda en `./data`.
