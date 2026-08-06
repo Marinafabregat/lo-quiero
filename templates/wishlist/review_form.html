@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Nueva revisión — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold text-slate-900 mb-1">Nueva revisión</h1>
+    <p class="text-sm text-slate-500 mb-6">
+      Para «{{ product.name }}». Responde con calma: cada revisión se guarda
+      en el historial y no se sobrescribe.
+    </p>
+
+    <form method="post" class="card space-y-6" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <section aria-label="Puntuaciones">
+        <h2 class="section-title">Puntuaciones</h2>
+        <p class="text-xs text-slate-500 mb-3">Valores entre 1 y 10 (10 = mucho / mucho interés).</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          {% for field in form %}
+            {% if field.name == 'need_score' or field.name == 'value_score' or field.name == 'interest_score' or field.name == 'expected_uses' %}
+              {% include "wishlist/includes/field.html" with field=field %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+
+      <section aria-label="Cuestionario de reflexión">
+        <h2 class="section-title">Cuestionario de reflexión</h2>
+        <div class="space-y-4">
+          {% for field in form %}
+            {% if field.name == 'need_score' or field.name == 'value_score' or field.name == 'interest_score' or field.name == 'expected_uses' %}
+            {% else %}
+              {% include "wishlist/includes/field.html" with field=field %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">Guardar revisión</button>
+        <a href="{% url 'product_detail' product.pk %}" class="btn btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

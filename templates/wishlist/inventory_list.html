@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load wishlist_extras %}
+{% block title %}Inventario — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Inventario</h1>
+      <p class="text-sm text-slate-500">Objetos que ya tienes. Ayudan a responder «¿ya tengo algo que haga lo mismo?».</p>
+    </div>
+    <a href="{% url 'inventory_create' %}" class="btn btn-primary">+ Añadir objeto</a>
+  </div>
+
+  <form method="get" class="card mb-6 flex flex-wrap items-end gap-3">
+    <div class="space-y-1">
+      <label for="category" class="form-label">Filtrar por categoría</label>
+      <select id="category" name="category" class="form-field">
+        <option value="">Todas</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {% if current_category %}
+      <a href="{% url 'inventory_list' %}" class="btn btn-ghost">Limpiar</a>
+    {% endif %}
+  </form>
+
+  {% if items %}
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Categoría</th><th>Estado</th><th>Frecuencia de uso</th>
+            <th>Último uso</th><th>Precio de compra</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+            <tr>
+              <td class="font-medium">{{ item.name }}</td>
+              <td>{% if item.category %}{{ item.category }}{% else %}—{% endif %}</td>
+              <td>{{ item.get_condition_display }}</td>
+              <td>{{ item.get_usage_frequency_display }}</td>
+              <td>
+                {% if item.last_used_at %}
+                  {{ item.last_used_at|date:"d/m/Y" }}
+                  {% if item.usage_frequency == 'never' %}<span class="badge bg-red-100 text-red-700 border-red-200 ml-1">Sin uso</span>{% endif %}
+                {% else %}—{% endif %}
+              </td>
+              <td>{% if item.purchase_price is not None %}{{ item.purchase_price|floatformat:2 }} €{% else %}—{% endif %}</td>
+              <td>
+                <div class="flex gap-2 justify-end">
+                  <a href="{% url 'inventory_edit' item.pk %}" class="link">Editar</a>
+                  <a href="{% url 'inventory_delete' item.pk %}" class="link text-red-600">Eliminar</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p class="text-lg font-medium text-slate-700">Tu inventario está vacío.</p>
+      <p class="text-sm text-slate-500">
+        Registra los objetos que ya posees para descubrir si cubren la misma necesidad que un producto que quieres comprar.
+      </p>
+      <a href="{% url 'inventory_create' %}" class="btn btn-primary mt-3">Añadir mi primer objeto</a>
+    </div>
+  {% endif %}
+{% endblock %}

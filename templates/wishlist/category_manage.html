@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Categorías — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold text-slate-900 mb-1">Categorías</h1>
+    <p class="text-sm text-slate-500 mb-6">
+      Renombra una categoría para corregir una errata en todos sus productos,
+      o elimínala. Al eliminar solo se quita la etiqueta: <strong>los productos no se borran</strong>.
+    </p>
+
+    {% if categories %}
+      <div class="card overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Productos</th>
+              <th>Renombrar</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in categories %}
+              <tr>
+                <td class="font-medium">{{ item.category }}</td>
+                <td>{{ item.count }}</td>
+                <td>
+                  <form method="post"
+                        action="{% url 'category_rename' item.category %}"
+                        class="flex flex-wrap items-center gap-2"
+                        aria-label="Renombrar {{ item.category }}">
+                    {% csrf_token %}
+                    <input type="text" name="name" value="{{ item.category }}"
+                           required maxlength="100" class="form-field"
+                           aria-label="Nuevo nombre de {{ item.category }}">
+                    <button type="submit" class="btn btn-ghost">Renombrar</button>
+                  </form>
+                </td>
+                <td>
+                  <a href="{% url 'category_delete' item.category %}"
+                     class="link text-red-600">Eliminar</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p class="text-lg font-medium text-slate-700">No hay categorías en uso.</p>
+        <p class="text-sm text-slate-500">Las categorías se crean al añadir productos.</p>
+        <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir un producto</a>
+      </div>
+    {% endif %}
+
+    <p class="mt-4">
+      <a href="{% url 'product_list' %}" class="link">Volver a productos</a>
+    </p>
+  </div>
+{% endblock %}

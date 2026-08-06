@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold text-slate-900 mb-1">{{ title }}</h1>
+    <p class="text-sm text-slate-500 mb-6">
+      Si dejas vacíos los días de espera se sugerirá un periodo de reflexión según el precio.
+    </p>
+
+    <form method="post" class="card space-y-4" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      {% for field in form %}
+        {% if field.name == 'category' %}
+          {% include "wishlist/includes/field.html" with field=field %}
+          <p class="text-xs -mt-2">
+            <a href="{% url 'category_manage' %}" class="link"
+               target="_blank" rel="noopener">Gestionar categorías</a>
+          </p>
+          <div id="new-category-field" hidden>
+            {% include "wishlist/includes/field.html" with field=form.new_category %}
+          </div>
+        {% elif field.name == 'new_category' %}
+          {# Se muestra junto a la categoría #}
+        {% else %}
+          {% include "wishlist/includes/field.html" with field=field %}
+        {% endif %}
+      {% endfor %}
+
+      <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        <p class="font-medium text-slate-700">Sugerencia de días de reflexión</p>
+        <p class="text-xs mt-1">Menos de 15 €: 7 días · 15–35 €: 15 días · 35–50 €: 30 días · 50 € o más: 45 días.</p>
+        <p id="suggestion-hint" class="text-xs mt-1 text-blue-700" hidden></p>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+        <a href="{% if product %}{% url 'product_detail' product.pk %}{% else %}{% url 'product_list' %}{% endif %}"
+           class="btn btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var priceField = document.querySelector('[name="current_price"]');
+    var daysField = document.querySelector('[name="waiting_days"]');
+    var hint = document.getElementById('suggestion-hint');
+    if (!priceField || !daysField || !hint) return;
+
+    var original = daysField.value;
+
+    function suggestedDays(price) {
+      if (price === null || price === '' || isNaN(price)) return null;
+      if (price < 15) return 7;
+      if (price < 35) return 15;
+      if (price < 50) return 30;
+      return 45;
+    }
+
+    priceField.addEventListener('input', function () {
+      var days = suggestedDays(priceField.value);
+      if (days === null) {
+        hint.hidden = true;
+        return;
+      }
+      hint.hidden = false;
+      var untouched = daysField.value === '' || daysField.value === original;
+      if (untouched) {
+        daysField.value = days;
+        hint.textContent = 'Días sugeridos para este precio: ' + days + '.';
+      } else {
+        hint.textContent = 'Días sugeridos para este precio: ' + days + ' (has elegido manualmente ' + daysField.value + ').';
+      }
+    });
+
+    var categorySelect = document.querySelector('[name="category"]');
+    var newCategoryField = document.getElementById('new-category-field');
+    if (!categorySelect || !newCategoryField) return;
+
+    function toggleNewCategory() {
+      var show = categorySelect.value === '__new__';
+      newCategoryField.hidden = !show;
+      if (show) {
+        var input = newCategoryField.querySelector('input');
+        if (input) input.focus();
+      }
+    }
+    categorySelect.addEventListener('change', toggleNewCategory);
+    toggleNewCategory();
+  });
+</script>
+{% endblock %}

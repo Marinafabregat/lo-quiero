@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    container_name: lo-quiero
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-}
+      DEBUG: ${DEBUG:-True}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+      DB_PATH: /app/data/db.sqlite3
+    restart: unless-stopped

@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}¿Lo quiero?{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <header class="bg-white border-b border-slate-200">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 py-3">
+        <a href="{% url 'dashboard' %}" class="flex flex-col">
+          <span class="text-xl font-bold tracking-tight text-slate-900">¿Lo quiero?</span>
+          <span class="text-xs text-slate-500">Decide antes de comprar.</span>
+        </a>
+        <nav aria-label="Navegación principal" class="flex flex-wrap items-center gap-1">
+          <a href="{% url 'dashboard' %}" class="nav-link" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>Panel</a>
+          <a href="{% url 'product_list' %}" class="nav-link" {% if request.resolver_match.url_name|slice:':7' == 'product' %}aria-current="page"{% endif %}>Productos</a>
+          <a href="{% url 'inventory_list' %}" class="nav-link" {% if request.resolver_match.url_name == 'inventory_list' %}aria-current="page"{% endif %}>Inventario</a>
+          <a href="{% url 'stats' %}" class="nav-link" {% if request.resolver_match.url_name == 'stats' %}aria-current="page"{% endif %}>Estadísticas</a>
+          <a href="{% url 'admin:index' %}" class="nav-link">Administración</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6">
+    {% if messages %}
+      <div class="space-y-2 mb-4">
+        {% for message in messages %}
+          <div class="rounded-lg border px-4 py-3 text-sm
+            {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-700{% elif message.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-800{% elif message.tags == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-800{% else %}border-slate-200 bg-slate-50 text-slate-700{% endif %}"
+            role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mx-auto max-w-6xl px-4 py-8 text-center text-xs text-slate-400">
+    ¿Lo quiero? — Decide antes de comprar. Aplicación personal para uso local.
+  </footer>
+</body>
+</html>

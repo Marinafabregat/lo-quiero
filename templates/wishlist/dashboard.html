@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load wishlist_extras %}
+{% block title %}Panel — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Panel</h1>
+      <p class="text-sm text-slate-500">Resumen de tus decisiones de compra.</p>
+    </div>
+    <a href="{% url 'product_create' %}" class="btn btn-primary">+ Añadir producto</a>
+  </div>
+
+  <section aria-label="Resumen rápido" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 mb-8">
+    <div class="stat">
+      <span class="stat-value">{{ waiting_count }}</span>
+      <span class="stat-label">En espera</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ due_count }}</span>
+      <span class="stat-label">Revisión pendiente</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ comparing_count }}</span>
+      <span class="stat-label">Comparando</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ candidate_count }}</span>
+      <span class="stat-label">Candidatos a compra</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value text-emerald-700">{{ money_spent|floatformat:2 }} €</span>
+      <span class="stat-label">Gastado</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value text-slate-500">{{ discarded_value|floatformat:2 }} €</span>
+      <span class="stat-label">Descartado (valor)</span>
+    </div>
+  </section>
+
+  {% if not board.0.products and not board.1.products and not board.2.products and not board.3.products %}
+    <div class="empty-state">
+      <p class="text-lg font-medium text-slate-700">Todavía no has añadido ningún producto.</p>
+      <p class="text-sm text-slate-500">Empieza guardando algo que quieras comprar y la aplicación te ayudará a decidir.</p>
+      <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir mi primer producto</a>
+    </div>
+  {% else %}
+    <div class="space-y-8">
+      {% for group in board %}
+        {% if group.products %}
+          <section aria-label="{{ group.label }}">
+            <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-800">
+              {{ group.label }}
+              <span class="badge {{ group.status|status_class }}">{{ group.products|length }}</span>
+            </h2>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {% for product in group.products %}
+                <div class="card">
+                  {% include "wishlist/includes/product_card.html" with product=product %}
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

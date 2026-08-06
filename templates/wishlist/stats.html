@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Estadísticas</h1>
+      <p class="text-sm text-slate-500">Resumen de tus decisiones de compra.</p>
+    </div>
+    <a href="{% url 'product_list' %}" class="btn btn-secondary">Ver productos</a>
+  </div>
+
+  {% if stats.total_products == 0 %}
+    <div class="empty-state">
+      <p class="text-lg font-medium text-slate-700">Todavía no hay datos suficientes.</p>
+      <p class="text-sm text-slate-500">Añade productos, compra o descarta algunos y vuelve para ver tus estadísticas.</p>
+      <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir producto</a>
+    </div>
+  {% else %}
+    <section aria-label="Resumen" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 mb-6">
+      <div class="stat"><span class="stat-value">{{ stats.total_products }}</span><span class="stat-label">Productos añadidos</span></div>
+      <div class="stat"><span class="stat-value text-emerald-700">{{ stats.purchased_count }}</span><span class="stat-label">Comprados</span></div>
+      <div class="stat"><span class="stat-value text-slate-500">{{ stats.discarded_count }}</span><span class="stat-label">Descartados</span></div>
+      <div class="stat"><span class="stat-value">{{ stats.discarded_percent|floatformat:1 }} %</span><span class="stat-label">Descartados</span></div>
+      <div class="stat"><span class="stat-value text-emerald-700">{{ stats.money_spent|floatformat:2 }} €</span><span class="stat-label">Dinero gastado</span></div>
+      <div class="stat"><span class="stat-value text-slate-500">{{ stats.discarded_value|floatformat:2 }} €</span><span class="stat-label">Valor descartado</span></div>
+      <div class="stat"><span class="stat-value">{{ stats.top_category|default:"—" }}</span><span class="stat-label">Categoría con más productos</span></div>
+      <div class="stat"><span class="stat-value">{{ stats.avg_days_to_purchase|default:"—" }}</span><span class="stat-label">Días medios hasta comprar</span></div>
+      <div class="stat"><span class="stat-value">{{ stats.avg_days_to_discard|default:"—" }}</span><span class="stat-label">Días medios hasta descartar</span></div>
+    </section>
+
+    <div class="card">
+      <h2 class="section-title">Cómo leer estos números</h2>
+      <ul class="list-disc list-inside space-y-1 text-sm text-slate-600">
+        <li><strong>Dinero gastado</strong> suma el precio actual de los productos marcados como comprados.</li>
+        <li><strong>Valor descartado</strong> es la suma aproximada del precio actual de los productos descartados: dinero que has evitado gastar.</li>
+        <li>Los días medios se calculan desde la creación del producto hasta su compra o descarte.</li>
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

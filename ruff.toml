@@ -1,0 +1,12 @@
+line-length = 88
+target-version = "py312"
+exclude = ["wishlist/migrations/", "node_modules", "data", "static"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# RUF012 (atributos mutables de clase) es un falso positivo para los
+# patrones declarativos habituales de Django (list_display, fields, etc.).
+ignore = ["RUF012"]
+
+[format]
+quote-style = "double"

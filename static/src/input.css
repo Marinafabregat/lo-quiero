@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors;
+  }
+  .btn-primary {
+    @apply bg-blue-700 text-white hover:bg-blue-800;
+  }
+  .btn-secondary {
+    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50;
+  }
+  .btn-ghost {
+    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-100;
+  }
+  .btn-success {
+    @apply bg-emerald-600 text-white hover:bg-emerald-700;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  .btn-danger-outline {
+    @apply border border-red-200 text-red-700 hover:bg-red-50;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 p-4 shadow-sm;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium;
+  }
+  .stat {
+    @apply bg-white rounded-xl border border-slate-200 p-3 shadow-sm;
+  }
+  .stat-value {
+    @apply block text-xl font-bold text-slate-800;
+  }
+  .stat-label {
+    @apply block text-xs text-slate-500 mt-0.5;
+  }
+
+  .form-field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400;
+  }
+  .form-field-invalid {
+    @apply border-red-400 bg-red-50;
+  }
+  .form-label {
+    @apply block text-sm font-medium text-slate-700;
+  }
+
+  .table {
+    @apply w-full text-sm text-left text-slate-700;
+  }
+  .table thead th {
+    @apply border-b border-slate-200 px-3 py-2 text-xs uppercase tracking-wide text-slate-500 font-semibold;
+  }
+  .table tbody td {
+    @apply border-b border-slate-100 px-3 py-2 align-top;
+  }
+
+  .section-title {
+    @apply text-base font-semibold text-slate-800 mb-3;
+  }
+  .nav-link {
+    @apply rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-slate-100 text-slate-900 font-medium;
+  }
+  .link {
+    @apply text-blue-700 hover:underline;
+  }
+
+  .empty-state {
+    @apply rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center;
+  }
+  .empty-inline {
+    @apply text-sm text-slate-500;
+  }
+}

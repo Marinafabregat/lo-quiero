@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load wishlist_extras %}
+{% block title %}{{ product.name }} — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-2">
+        {{ product.name }}
+        <span class="badge {{ product.status|status_class }}">{{ product.get_status_display }}</span>
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        {% if product.category %}Categoría: {{ product.category }} · {% endif %}
+        Prioridad <span class="badge {{ product.priority|priority_class }}">{{ product.get_priority_display }}</span>
+        {% if product.created_at %} · Guardado hace {{ product.days_stored }} día{{ product.days_stored|pluralize }}{% endif %}
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'product_edit' product.pk %}" class="btn btn-secondary">Editar</a>
+      <a href="{% url 'product_delete' product.pk %}" class="btn btn-danger-outline">Eliminar</a>
+    </div>
+  </div>
+
+  {% if product.image_url %}
+    <img src="{{ product.image_url }}" alt="Imagen de {{ product.name }}"
+         class="h-40 w-40 rounded-xl border border-slate-200 object-cover mb-4" loading="lazy">
+  {% endif %}
+
+  <div class="mb-6 flex flex-wrap gap-2">
+    {% if product.status != 'purchased' and product.status != 'discarded' %}
+      <form method="post" action="{% url 'product_purchase' product.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Comprar</button>
+      </form>
+      <form method="post" action="{% url 'product_discard' product.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Descartar</button>
+      </form>
+      <form method="post" action="{% url 'product_postpone' product.pk %}" class="flex items-center gap-2">
+        {% csrf_token %}
+        <label for="postpone-days" class="text-sm text-slate-600">Posponer</label>
+        <select id="postpone-days" name="days" class="form-field w-24">
+          <option value="7">7 días</option>
+          <option value="15">15 días</option>
+          <option value="30">30 días</option>
+          <option value="45">45 días</option>
+        </select>
+        <button type="submit" class="btn btn-ghost">Aplicar</button>
+      </form>
+    {% endif %}
+    <a href="{% url 'review_create' product.pk %}" class="btn btn-secondary">+ Nueva revisión</a>
+    <a href="{% url 'alternative_create' product.pk %}" class="btn btn-secondary">+ Alternativa</a>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <div class="space-y-6">
+      <section class="card" aria-label="Datos generales">
+        <h2 class="section-title">Datos generales</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div><dt class="text-slate-500">Precio actual</dt><dd class="font-medium">{% if product.current_price is not None %}{{ product.current_price|floatformat:2 }} €{% else %}—{% endif %}</dd></div>
+          <div><dt class="text-slate-500">Precio objetivo</dt><dd class="font-medium">{% if product.target_price is not None %}{{ product.target_price|floatformat:2 }} €{% else %}—{% endif %}</dd></div>
+          <div><dt class="text-slate-500">Periodo de reflexión</dt><dd>{{ product.waiting_days }} días</dd></div>
+          <div><dt class="text-slate-500">Fecha de revisión</dt><dd>{% if product.review_date %}{{ product.review_date|date:"d/m/Y" }}{% else %}—{% endif %}</dd></div>
+          {% if product.is_due_for_review %}
+            <div><dt class="text-slate-500">Estado de revisión</dt><dd class="text-amber-700 font-medium">Revisión pendiente</dd></div>
+          {% elif product.review_date %}
+            <div><dt class="text-slate-500">Días restantes</dt><dd>{{ product.days_remaining }}</dd></div>
+          {% endif %}
+          {% if product.purchased_at %}
+            <div><dt class="text-slate-500">Comprado</dt><dd>{{ product.purchased_at|date:"d/m/Y" }}</dd></div>
+          {% endif %}
+          {% if product.discarded_at %}
+            <div><dt class="text-slate-500">Descartado</dt><dd>{{ product.discarded_at|date:"d/m/Y" }}</dd></div>
+          {% endif %}
+        </dl>
+        {% if product.description %}
+          <p class="mt-3 text-sm text-slate-700">{{ product.description|linebreaksbr }}</p>
+        {% endif %}
+        {% if product.reason %}
+          <div class="mt-3">
+            <p class="text-sm font-medium text-slate-700">Motivo por el que lo quiero</p>
+            <p class="text-sm text-slate-600">{{ product.reason|linebreaksbr }}</p>
+          </div>
+        {% endif %}
+        {% if product.url %}
+          <p class="mt-3"><a href="{{ product.url }}" target="_blank" rel="noopener noreferrer" class="link">Ver enlace del producto →</a></p>
+        {% endif %}
+      </section>
+
+      {% if recommendation %}
+        <section class="card border-2 {{ recommendation.code|rec_class }}" aria-label="Recomendación">
+          <h2 class="section-title">Recomendación actual</h2>
+          <p class="font-semibold">{{ recommendation.label }}</p>
+          <p class="text-sm mt-1">{{ recommendation.description }}</p>
+          <p class="text-xs mt-3 text-slate-500">
+            Basada en la última revisión (necesidad {{ product.last_review.need_score }}/10 y valor {{ product.last_review.value_score }}/10).
+            Es una orientación, no una decisión automática.
+          </p>
+        </section>
+      {% endif %}
+
+      <section class="card" aria-label="Historial de precios">
+        <h2 class="section-title">Historial de precios</h2>
+        <form method="post" action="{% url 'price_snapshot_create' product.pk %}" class="flex flex-wrap items-end gap-2 mb-3">
+          {% csrf_token %}
+          <div class="space-y-1">
+            <label for="price-snapshot" class="form-label">Registrar precio</label>
+            <input type="number" id="price-snapshot" name="price" step="0.01" min="0" required class="form-field w-40">
+          </div>
+          <button type="submit" class="btn btn-secondary">Guardar</button>
+        </form>
+        {% if product.price_snapshots.all %}
+          <table class="table">
+            <thead><tr><th>Precio</th><th>Registrado</th></tr></thead>
+            <tbody>
+              {% for snapshot in product.price_snapshots.all %}
+                <tr><td>{{ snapshot.price|floatformat:2 }} €</td><td>{{ snapshot.recorded_at|date:"d/m/Y H:i" }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty-inline">Sin precios registrados todavía.</p>
+        {% endif %}
+      </section>
+
+      {% if owned_items %}
+        <section class="card border-amber-200 bg-amber-50" aria-label="Advertencia de inventario">
+          <h2 class="section-title text-amber-900">Ya tienes algo similar</h2>
+          <p class="text-sm text-amber-800 mb-2">
+            Estos objetos de tu inventario tienen la misma categoría («{{ product.category }}»):
+          </p>
+          <ul class="space-y-1 text-sm text-amber-900">
+            {% for item in owned_items %}
+              <li>• {{ item.name }}
+                {% if item.last_used_at %}<span class="text-amber-700">(último uso: {{ item.last_used_at|date:"d/m/Y" }})</span>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          <p class="text-xs text-amber-700 mt-2">¿Necesitas realmente otro?</p>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="space-y-6">
+      <section class="card" aria-label="Historial de revisiones">
+        <h2 class="section-title">Historial de revisiones</h2>
+        {% if product.reviews.all %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Necesidad</th><th>Valor</th><th>Interés</th><th>Usos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for review in product.reviews.all %}
+                <tr>
+                  <td>{{ review.created_at|date:"d/m/Y" }}</td>
+                  <td>{{ review.need_score }}/10</td>
+                  <td>{{ review.value_score }}/10</td>
+                  <td>{{ review.interest_score }}/10</td>
+                  <td>{{ review.expected_uses }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% for review in product.reviews.all %}
+            <details class="mt-2 text-sm">
+              <summary class="cursor-pointer text-slate-600 hover:text-slate-900">Respuestas del {{ review.created_at|date:"d/m/Y" }}</summary>
+              <dl class="mt-2 space-y-1">
+                {% for key, question in review.answers.items %}
+                  <div>
+                    <dt class="text-slate-500">{{ question.label }}</dt>
+                    <dd class="text-slate-700">{{ question.answer }}</dd>
+                  </div>
+                {% endfor %}
+                {% if review.notes %}
+                  <div><dt class="text-slate-500">Notas</dt><dd class="text-slate-700">{{ review.notes }}</dd></div>
+                {% endif %}
+              </dl>
+            </details>
+          {% endfor %}
+        {% else %}
+          <p class="empty-inline">Sin revisiones todavía.</p>
+          <a href="{% url 'review_create' product.pk %}" class="btn btn-secondary mt-2">Hacer la primera revisión</a>
+        {% endif %}
+      </section>
+
+      <section class="card" aria-label="Alternativas y comparación">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="section-title mb-0">Alternativas y comparación</h2>
+          <a href="{% url 'alternative_create' product.pk %}" class="btn btn-secondary text-sm">+ Añadir</a>
+        </div>
+
+        {% if comparisons %}
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Alternativa</th><th>Precio</th><th>Diferencia</th><th>Ahorro</th>
+                  <th>Similitud</th><th>Calidad</th><th>Durabilidad</th><th>Garantía</th>
+                  <th>Estado</th><th>Puntuación</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cmp in comparisons %}
+                  <tr class="{% if cmp.alternative == cheapest and cmp.alternative == best %}bg-emerald-50{% elif cmp.alternative == cheapest %}bg-sky-50{% elif cmp.alternative == best %}bg-violet-50{% endif %}">
+                    <td>
+                      <span class="font-medium">{{ cmp.alternative.name }}</span>
+                      {% if cmp.alternative == cheapest %}<span class="badge bg-sky-100 text-sky-800 border-sky-200 ml-1">Más barata</span>{% endif %}
+                      {% if cmp.alternative == best %}<span class="badge bg-violet-100 text-violet-800 border-violet-200 ml-1">Mejor puntuación</span>{% endif %}
+                      {% if cmp.alternative.is_second_hand %}<span class="badge bg-slate-100 text-slate-600 border-slate-200 ml-1">Segunda mano</span>{% endif %}
+                    </td>
+                    <td>{% if cmp.alternative.price is not None %}{{ cmp.alternative.price|floatformat:2 }} €{% else %}—{% endif %}</td>
+                    <td>
+                      {% if cmp.difference is not None %}
+                        <span class="{% if cmp.difference < 0 %}text-emerald-700{% elif cmp.difference > 0 %}text-red-700{% endif %}">
+                          {% if cmp.difference < 0 %}-{% endif %}{{ cmp.difference|floatformat:2 }} €
+                        </span>
+                      {% else %}—{% endif %}
+                    </td>
+                    <td>{% if cmp.savings is not None %}{{ cmp.savings|floatformat:2 }} %{% else %}—{% endif %}</td>
+                    <td>{{ cmp.alternative.similarity_score }}%</td>
+                    <td>{{ cmp.alternative.quality_score }}/10</td>
+                    <td>{{ cmp.alternative.durability_score }}/10</td>
+                    <td>{{ cmp.alternative.warranty_months }} mes{{ cmp.alternative.warranty_months|pluralize }}</td>
+                    <td>{% if cmp.alternative.is_second_hand %}2.ª mano{% else %}Nuevo{% endif %}</td>
+                    <td><span class="font-semibold">{{ cmp.combined|floatformat:1 }}/10</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            {% for cmp in comparisons %}
+              <a href="{% url 'alternative_edit' product.pk cmp.alternative.pk %}" class="btn btn-ghost text-sm">Editar «{{ cmp.alternative.name }}»</a>
+              <a href="{% url 'alternative_delete' product.pk cmp.alternative.pk %}" class="btn btn-danger-outline text-sm">Eliminar «{{ cmp.alternative.name }}»</a>
+            {% endfor %}
+          </div>
+          <p class="mt-3 text-xs text-slate-500">
+            La puntuación combinada (similitud 40 %, calidad 35 %, durabilidad 25 %) es una ayuda orientativa,
+            no una valoración objetiva. El porcentaje de ahorro compara la alternativa con el precio actual del original.
+          </p>
+          {% for cmp in comparisons %}
+            {% if cmp.alternative.notes %}
+              <div class="mt-2 text-sm text-slate-600">
+                <span class="font-medium">{{ cmp.alternative.name }}:</span> {{ cmp.alternative.notes }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p class="empty-inline">Aún no has añadido alternativas para comparar.</p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+{% endblock %}

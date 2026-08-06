@@ -1,0 +1,16 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+db.sqlite3
+data/
+.env
+.pytest_cache
+.ruff_cache
+node_modules
+static/src
+PLAN.md
+README.md
+AGENTS.md

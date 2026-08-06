@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Productos — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Productos</h1>
+      <p class="text-sm text-slate-500">{{ products|length }} producto{{ products|length|pluralize }} en tu lista.</p>
+    </div>
+    <a href="{% url 'product_create' %}" class="btn btn-primary">+ Añadir producto</a>
+  </div>
+
+  <form method="get" class="card mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="search">
+    <div class="space-y-1">
+      <label for="q" class="form-label">Buscar</label>
+      <input type="search" id="q" name="q" value="{{ query }}" class="form-field" placeholder="Nombre del producto…">
+    </div>
+    <div class="space-y-1">
+      <label for="status" class="form-label">Estado</label>
+      <select id="status" name="status" class="form-field">
+        <option value="">Todos</option>
+        {% for value, label in statuses %}
+          <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="space-y-1">
+      <label for="category" class="form-label">Categoría</label>
+      <select id="category" name="category" class="form-field">
+        <option value="">Todas</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="space-y-1">
+      <label for="order" class="form-label">Ordenar por</label>
+      <select id="order" name="order" class="form-field">
+        <option value="created" {% if current_order == 'created' %}selected{% endif %}>Fecha (recientes primero)</option>
+        <option value="name" {% if current_order == 'name' %}selected{% endif %}>Nombre (A-Z)</option>
+        <option value="price" {% if current_order == 'price' %}selected{% endif %}>Precio</option>
+        <option value="review" {% if current_order == 'review' %}selected{% endif %}>Fecha de revisión</option>
+      </select>
+    </div>
+    <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-2">
+      <button type="submit" class="btn btn-secondary">Aplicar filtros</button>
+      <a href="{% url 'product_list' %}" class="btn btn-ghost">Limpiar</a>
+    </div>
+  </form>
+
+  {% if products %}
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {% for product in products %}
+        <div class="card">
+          {% include "wishlist/includes/product_card.html" with product=product %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p class="text-lg font-medium text-slate-700">No hay productos que mostrar.</p>
+      <p class="text-sm text-slate-500">
+        {% if query or current_status or current_category %}
+          No hay resultados con los filtros aplicados. Prueba a limpiarlos.
+        {% else %}
+          Aún no has guardado ningún producto.
+        {% endif %}
+      </p>
+      <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir producto</a>
+    </div>
+  {% endif %}
+{% endblock %}
