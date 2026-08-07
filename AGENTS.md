@@ -24,7 +24,7 @@ Aplicación web personal de Django para decidir compras: periodo de reflexión, 
 - **Validación en el servidor** (formularios). JavaScript solo como mejora visual (p. ej. sugerir días de espera).
 - **Sin `mark_safe`** con datos del usuario; el autoescapado de Django está activo.
 - **Historial inmutable**: cada `DecisionReview` crea un registro nuevo; nunca se sobrescribe.
-- Estado de producto: `new`, `waiting`, `comparing`, `possible_purchase`, `purchased`, `discarded`.
+- Estado de producto: `new`, `waiting`, `comparing`, `purchased`, `discarded`.
 - Preferir vistas basadas en funciones; las mutaciones van por **POST** y redirigen (patrón PRG).
 - Evitar consultas N+1 con `prefetch_related`/`select_related` donde corresponda.
 - Ruff para lint y formato (ver `ruff.toml`).
@@ -52,7 +52,7 @@ docker compose exec web python manage.py test
 - **Fecha de revisión** (`compute_review_date` / `Product.save`): `fecha de creación + waiting_days`, solo al crear.
 - **Sugerencia de días**: en `ProductForm`, si el campo está vacío se aplica la sugerencia; el valor manual se respeta.
 - **Estado inicial**: al crear con `waiting_days > 0`, el estado es `waiting` (se cambia después desde la ficha).
-- **Recomendación** (`purchase_recommendation`): matriz necesidad × valor (alto = >= 7). Es orientación, no decisión automática.
+- **Recomendación** (`purchase_recommendation`): matriz necesidad × interés (alto = >= 7). Es orientación, no decisión automática.
 - **Comparación** (`price_comparison`): diferencia y % de ahorro; evita dividir por cero (precio original 0 → sin porcentaje; sin precios → sin comparación).
 - **Puntuación combinada** (`combined_score`): `similitud×0.4 + calidad×0.35 + durabilidad×0.25`, escala 0–10, un decimal. Orientativa, no objetiva.
 - **Estadísticas** (`compute_stats`): controla listas vacías; `created_at` no se puede fijar por `create()` porque es `auto_now_add` (usar `.update()` en tests).

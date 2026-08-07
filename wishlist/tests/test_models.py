@@ -84,11 +84,9 @@ class ProductModelTests(TestCase):
 
     def test_last_review_returns_newest(self):
         product = Product.objects.create(name="Auriculares")
-        DecisionReview.objects.create(
-            product=product, need_score=5, value_score=5, interest_score=5
-        )
+        DecisionReview.objects.create(product=product, need_score=5, interest_score=5)
         newest = DecisionReview.objects.create(
-            product=product, need_score=9, value_score=8, interest_score=9
+            product=product, need_score=9, interest_score=9
         )
         self.assertEqual(product.last_review().pk, newest.pk)
 

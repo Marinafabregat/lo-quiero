@@ -113,7 +113,6 @@ class ProductViewTests(TestCase):
         DecisionReview.objects.create(
             product=self.product,
             need_score=8,
-            value_score=8,
             interest_score=9,
         )
         response = self.client.get(reverse("product_detail", args=[self.product.pk]))
@@ -147,9 +146,7 @@ class ReviewAndAlternativeViewsTests(TestCase):
             reverse("review_create", args=[self.product.pk]),
             {
                 "need_score": "8",
-                "value_score": "6",
                 "interest_score": "9",
-                "expected_uses": "50",
                 "notes": "",
                 "q1": "Respuesta",
                 "q2": "",
@@ -171,9 +168,7 @@ class ReviewAndAlternativeViewsTests(TestCase):
             reverse("review_create", args=[self.product.pk]),
             {
                 "need_score": "15",
-                "value_score": "6",
                 "interest_score": "9",
-                "expected_uses": "50",
                 "notes": "",
             },
         )

@@ -181,9 +181,7 @@ class ReviewFormTests(TestCase):
     def review_data(self, **overrides):
         data = {
             "need_score": "8",
-            "value_score": "6",
             "interest_score": "9",
-            "expected_uses": "50",
             "notes": "",
             "q1": "Me aíslo del ruido",
             "q2": "No",

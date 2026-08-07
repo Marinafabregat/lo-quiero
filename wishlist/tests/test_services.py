@@ -56,22 +56,22 @@ class ComputeReviewDateTests(SimpleTestCase):
 
 
 class PurchaseRecommendationTests(SimpleTestCase):
-    def test_high_need_and_high_value(self):
+    def test_high_need_and_high_interest(self):
         rec = purchase_recommendation(8, 8)
         self.assertEqual(rec.label, "Considerar compra")
         self.assertEqual(rec.code, "considerar")
 
-    def test_high_need_and_low_value(self):
+    def test_high_need_and_low_interest(self):
         rec = purchase_recommendation(8, 4)
         self.assertEqual(rec.label, "Buscar una alternativa")
         self.assertEqual(rec.code, "alternativa")
 
-    def test_low_need_and_high_value(self):
+    def test_low_need_and_high_interest(self):
         rec = purchase_recommendation(4, 8)
         self.assertEqual(rec.label, "Esperar: puede ser un capricho")
         self.assertEqual(rec.code, "esperar")
 
-    def test_low_need_and_low_value(self):
+    def test_low_need_and_low_interest(self):
         rec = purchase_recommendation(4, 4)
         self.assertEqual(rec.label, "Descartar")
         self.assertEqual(rec.code, "descartar")

@@ -8,7 +8,6 @@ STATUS_CLASSES = {
     "new": "bg-sky-100 text-sky-800 border-sky-200",
     "waiting": "bg-amber-100 text-amber-800 border-amber-200",
     "comparing": "bg-violet-100 text-violet-800 border-violet-200",
-    "possible_purchase": "bg-emerald-100 text-emerald-800 border-emerald-200",
     "purchased": "bg-green-100 text-green-800 border-green-200",
     "discarded": "bg-slate-200 text-slate-600 border-slate-300",
 }

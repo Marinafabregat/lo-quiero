@@ -60,47 +60,46 @@ class Recommendation:
     description: str
 
 
-def purchase_recommendation(need_score: int, value_score: int) -> Recommendation:
+def purchase_recommendation(need_score: int, interest_score: int) -> Recommendation:
     """Matriz de recomendación a partir de la última revisión."""
     if not 1 <= need_score <= 10:
         raise ValueError("La necesidad debe estar entre 1 y 10.")
-    if not 1 <= value_score <= 10:
-        raise ValueError("El valor debe estar entre 1 y 10.")
+    if not 1 <= interest_score <= 10:
+        raise ValueError("El interés debe estar entre 1 y 10.")
 
     high_need = need_score >= 7
-    high_value = value_score >= 7
+    high_interest = interest_score >= 7
 
-    if high_need and high_value:
+    if high_need and high_interest:
         return Recommendation(
             label="Considerar compra",
             code="considerar",
             description=(
-                "La necesidad y el valor que le das son altos. "
+                "La necesidad y el interés son altos. "
                 "Puede ser un buen momento para comprarlo."
             ),
         )
-    if high_need and not high_value:
+    if high_need and not high_interest:
         return Recommendation(
             label="Buscar una alternativa",
             code="alternativa",
             description=(
-                "La necesidad es alta, pero el valor que percibes es bajo. "
+                "La necesidad es alta, pero el interés es bajo. "
                 "Revisa los «dupes» y alternativas antes de comprar."
             ),
         )
-    if not high_need and high_value:
+    if not high_need and high_interest:
         return Recommendation(
             label="Esperar: puede ser un capricho",
             code="esperar",
             description=(
-                "Te parece barato o atractivo, pero no lo necesitas. "
-                "Espera un poco más antes de decidir."
+                "Te atrae, pero no lo necesitas. Espera un poco más antes de decidir."
             ),
         )
     return Recommendation(
         label="Descartar",
         code="descartar",
-        description=("Ni lo necesitas ni le ves valor. Lo más sensato es descartarlo."),
+        description=("Ni lo necesitas ni te interesa. Lo más sensato es descartarlo."),
     )
 
 
@@ -109,7 +108,7 @@ def product_recommendation(product: Product) -> Recommendation | None:
     review = product.last_review()
     if review is None:
         return None
-    return purchase_recommendation(review.need_score, review.value_score)
+    return purchase_recommendation(review.need_score, review.interest_score)
 
 
 # ---------------------------------------------------------------------------

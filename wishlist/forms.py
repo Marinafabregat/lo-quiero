@@ -187,22 +187,16 @@ class ReviewForm(forms.ModelForm):
         model = DecisionReview
         fields = [
             "need_score",
-            "value_score",
             "interest_score",
-            "expected_uses",
             "notes",
         ]
         widgets = {
             "need_score": forms.NumberInput(
                 attrs={"class": "form-field", "min": 1, "max": 10}
             ),
-            "value_score": forms.NumberInput(
-                attrs={"class": "form-field", "min": 1, "max": 10}
-            ),
             "interest_score": forms.NumberInput(
                 attrs={"class": "form-field", "min": 1, "max": 10}
             ),
-            "expected_uses": forms.NumberInput(attrs={"class": "form-field", "min": 0}),
             "notes": forms.Textarea(attrs={"class": "form-field", "rows": 3}),
         }
 

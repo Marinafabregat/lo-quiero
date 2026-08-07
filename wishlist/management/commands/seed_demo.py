@@ -110,9 +110,7 @@ class Command(BaseCommand):
             DecisionReview.objects.create(
                 product=auriculares,
                 need_score=8,
-                value_score=5,
                 interest_score=9,
-                expected_uses=150,
                 answers={
                     "q1": {
                         "label": "¿Qué problema concreto resuelve?",
@@ -185,9 +183,7 @@ class Command(BaseCommand):
             DecisionReview.objects.create(
                 product=mochila,
                 need_score=7,
-                value_score=6,
                 interest_score=6,
-                expected_uses=200,
             )
             self.stdout.write("  + Revisión para la mochila")
 
@@ -207,7 +203,7 @@ class Command(BaseCommand):
                     "de espalda al final del día."
                 ),
                 "priority": Product.Priority.HIGH,
-                "status": Product.Status.POSSIBLE_PURCHASE,
+                "status": Product.Status.COMPARING,
                 "waiting_days": 45,
                 "review_date": today + timedelta(days=2),
             },
@@ -219,9 +215,7 @@ class Command(BaseCommand):
             DecisionReview.objects.create(
                 product=silla,
                 need_score=9,
-                value_score=8,
                 interest_score=8,
-                expected_uses=250,
             )
             self.stdout.write("  + Revisión para la silla")
 
@@ -243,9 +237,7 @@ class Command(BaseCommand):
             DecisionReview.objects.create(
                 product=descartado,
                 need_score=2,
-                value_score=3,
                 interest_score=4,
-                expected_uses=10,
             )
             self.stdout.write(f"  + Producto descartado: {descartado.name}")
 
@@ -267,9 +259,7 @@ class Command(BaseCommand):
             DecisionReview.objects.create(
                 product=comprado,
                 need_score=9,
-                value_score=8,
                 interest_score=8,
-                expected_uses=300,
             )
             self.stdout.write(f"  + Producto comprado: {comprado.name}")
 

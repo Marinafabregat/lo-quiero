@@ -93,7 +93,7 @@
           <p class="font-semibold">{{ recommendation.label }}</p>
           <p class="text-sm mt-1">{{ recommendation.description }}</p>
           <p class="text-xs mt-3 text-slate-500">
-            Basada en la última revisión (necesidad {{ product.last_review.need_score }}/10 y valor {{ product.last_review.value_score }}/10).
+            Basada en la última revisión (necesidad {{ product.last_review.need_score }}/10 e interés {{ product.last_review.interest_score }}/10).
             Es una orientación, no una decisión automática.
           </p>
         </section>
@@ -148,7 +148,7 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Fecha</th><th>Necesidad</th><th>Valor</th><th>Interés</th><th>Usos</th>
+                <th>Fecha</th><th>Necesidad</th><th>Interés</th>
               </tr>
             </thead>
             <tbody>
@@ -156,9 +156,7 @@
                 <tr>
                   <td>{{ review.created_at|date:"d/m/Y" }}</td>
                   <td>{{ review.need_score }}/10</td>
-                  <td>{{ review.value_score }}/10</td>
                   <td>{{ review.interest_score }}/10</td>
-                  <td>{{ review.expected_uses }}</td>
                 </tr>
               {% endfor %}
             </tbody>

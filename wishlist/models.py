@@ -13,7 +13,6 @@ class Product(models.Model):
         NEW = "new", "Nuevo"
         WAITING = "waiting", "En espera"
         COMPARING = "comparing", "Comparando"
-        POSSIBLE_PURCHASE = "possible_purchase", "Compra posible"
         PURCHASED = "purchased", "Comprado"
         DISCARDED = "discarded", "Descartado"
 
@@ -213,15 +212,10 @@ class DecisionReview(models.Model):
         "necesidad",
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
-    value_score = models.PositiveSmallIntegerField(
-        "valor",
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
-    )
     interest_score = models.PositiveSmallIntegerField(
         "interés",
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
-    expected_uses = models.PositiveIntegerField("usos esperados", default=0)
 
     answers = models.JSONField("respuestas", default=dict, blank=True)
     notes = models.TextField("notas", blank=True)

@@ -34,7 +34,6 @@ DASHBOARD_GROUPS = [
     Product.Status.NEW,
     Product.Status.WAITING,
     Product.Status.COMPARING,
-    Product.Status.POSSIBLE_PURCHASE,
     Product.Status.PURCHASED,
     Product.Status.DISCARDED,
 ]
@@ -89,7 +88,6 @@ def dashboard(request):
         "waiting_count": len(groups[Product.Status.WAITING]),
         "due_count": len(due_products),
         "comparing_count": len(groups[Product.Status.COMPARING]),
-        "candidate_count": len(groups[Product.Status.POSSIBLE_PURCHASE]),
         "discarded_count": len(groups[Product.Status.DISCARDED]),
         "money_spent": spent,
         "discarded_value": discarded_value,

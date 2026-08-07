@@ -20,9 +20,7 @@ class ReviewInline(admin.TabularInline):
     extra = 0
     fields = [
         "need_score",
-        "value_score",
         "interest_score",
-        "expected_uses",
         "created_at",
     ]
     readonly_fields = ["created_at"]
@@ -115,9 +113,7 @@ class DecisionReviewAdmin(admin.ModelAdmin):
     list_display = [
         "product",
         "need_score",
-        "value_score",
         "interest_score",
-        "expected_uses",
         "created_at",
     ]
     list_filter = ["created_at"]
