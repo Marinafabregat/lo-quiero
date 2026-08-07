@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Alternative, DecisionReview, OwnedItem, PriceSnapshot, Product
+from .models import (
+    Alternative,
+    AppSettings,
+    DecisionReview,
+    OwnedItem,
+    PriceSnapshot,
+    Product,
+)
 
 
 class AlternativeInline(admin.TabularInline):
@@ -141,3 +148,25 @@ class PriceSnapshotAdmin(admin.ModelAdmin):
     list_filter = ["recorded_at"]
     search_fields = ["product__name"]
     readonly_fields = ["recorded_at"]
+
+
+@admin.register(AppSettings)
+class AppSettingsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (
+            "Periodo de reflexión",
+            {
+                "fields": (
+                    "price_tier_1",
+                    "waiting_days_1",
+                    "price_tier_2",
+                    "waiting_days_2",
+                    "price_tier_3",
+                    "waiting_days_3",
+                    "waiting_days_max",
+                )
+            },
+        ),
+        ("Fechas", {"fields": ("updated_at",)}),
+    )
+    readonly_fields = ["updated_at"]

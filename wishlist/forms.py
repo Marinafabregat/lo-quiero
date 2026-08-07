@@ -2,8 +2,15 @@
 
 from django import forms
 
-from .models import Alternative, DecisionReview, OwnedItem, PriceSnapshot, Product
-from .services import suggested_waiting_days
+from .models import (
+    Alternative,
+    AppSettings,
+    DecisionReview,
+    OwnedItem,
+    PriceSnapshot,
+    Product,
+)
+from .services import suggested_waiting_days, waiting_config
 
 # Preguntas del cuestionario de reflexión.
 # (clave, texto de la pregunta)
@@ -79,7 +86,9 @@ class ProductForm(forms.ModelForm):
             and price_initial is not None
             and "waiting_days" not in self.data
         ):
-            self.initial["waiting_days"] = suggested_waiting_days(price_initial)
+            self.initial["waiting_days"] = suggested_waiting_days(
+                price_initial, waiting_config(AppSettings.load())
+            )
         self._set_category_choices()
 
     def _existing_categories(self):
@@ -114,7 +123,9 @@ class ProductForm(forms.ModelForm):
             if waiting_days is None:
                 waiting_days = 7
         elif waiting_days is None:
-            waiting_days = suggested_waiting_days(current_price)
+            waiting_days = suggested_waiting_days(
+                current_price, waiting_config(AppSettings.load())
+            )
 
         cleaned["waiting_days"] = waiting_days
         self.instance.waiting_days = waiting_days
@@ -299,3 +310,56 @@ class CategoryRenameForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={"class": "form-field"}),
     )
+
+
+class AppSettingsForm(forms.ModelForm):
+    class Meta:
+        model = AppSettings
+        fields = [
+            "price_tier_1",
+            "waiting_days_1",
+            "price_tier_2",
+            "waiting_days_2",
+            "price_tier_3",
+            "waiting_days_3",
+            "waiting_days_max",
+        ]
+        widgets = {
+            "price_tier_1": forms.NumberInput(
+                attrs={"class": "form-field", "step": "0.01", "min": "0.01"}
+            ),
+            "price_tier_2": forms.NumberInput(
+                attrs={"class": "form-field", "step": "0.01", "min": "0.01"}
+            ),
+            "price_tier_3": forms.NumberInput(
+                attrs={"class": "form-field", "step": "0.01", "min": "0.01"}
+            ),
+            "waiting_days_1": forms.NumberInput(
+                attrs={"class": "form-field", "min": 0}
+            ),
+            "waiting_days_2": forms.NumberInput(
+                attrs={"class": "form-field", "min": 0}
+            ),
+            "waiting_days_3": forms.NumberInput(
+                attrs={"class": "form-field", "min": 0}
+            ),
+            "waiting_days_max": forms.NumberInput(
+                attrs={"class": "form-field", "min": 0}
+            ),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned is None:
+            return cleaned
+        tiers = [
+            cleaned.get("price_tier_1"),
+            cleaned.get("price_tier_2"),
+            cleaned.get("price_tier_3"),
+        ]
+        if all(t is not None for t in tiers) and not (tiers[0] < tiers[1] < tiers[2]):
+            self.add_error(
+                "price_tier_3",
+                "Los umbrales deben ir en orden creciente (bajo < medio < alto).",
+            )
+        return cleaned

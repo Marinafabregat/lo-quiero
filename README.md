@@ -12,7 +12,8 @@ Aplicación web **personal** para reflexionar antes de comprar: guarda productos
 
 - Guardar productos que quieres comprar con precio, categoría, motivo y prioridad.
 - Elegir la categoría de un desplegable con las existentes o **crear una nueva**, y **gestionarlas** (renombrar para corregir erratas o eliminar etiquetas sin borrar los productos asociados).
-- Sugerir un **periodo de reflexión** según el precio (7 / 15 / 30 / 45 días), modificable manualmente.
+- Sugerir un **periodo de reflexión** según el precio (7 / 15 / 30 / 45 días por defecto), modificable manualmente y configurable desde **Configuración**.
+- **Configurar** los umbrales de precio y días de espera, y **gestionar categorías**, desde una pestaña propia.
 - Responder un **cuestionario de 10 preguntas** y puntuar necesidad e interés en cada revisión.
 - Mostrar una **recomendación orientativa** según la última revisión.
 - Añadir **alternativas («dupes»)** y compararlas con el original (diferencia de precio, ahorro, similitud, calidad, durabilidad, garantía, segunda mano).

@@ -313,3 +313,59 @@ class PriceSnapshot(models.Model):
 
     def __str__(self):
         return f"{self.product.name}: {self.price}"
+
+
+class AppSettings(models.Model):
+    """Configuración global de la aplicación (una sola fila)."""
+
+    price_tier_1 = models.DecimalField(
+        "Umbral de precio bajo (€)",
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("15.00"),
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    waiting_days_1 = models.PositiveSmallIntegerField(
+        "Días de espera para precios bajos",
+        default=7,
+    )
+    price_tier_2 = models.DecimalField(
+        "Umbral de precio medio (€)",
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("35.00"),
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    waiting_days_2 = models.PositiveSmallIntegerField(
+        "Días de espera para precios medios",
+        default=15,
+    )
+    price_tier_3 = models.DecimalField(
+        "Umbral de precio alto (€)",
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("50.00"),
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    waiting_days_3 = models.PositiveSmallIntegerField(
+        "Días de espera para precios altos",
+        default=30,
+    )
+    waiting_days_max = models.PositiveSmallIntegerField(
+        "Días de espera para precios muy altos",
+        default=45,
+    )
+    updated_at = models.DateTimeField("actualizado", auto_now=True)
+
+    class Meta:
+        verbose_name = "configuración"
+        verbose_name_plural = "configuración"
+
+    @classmethod
+    def load(cls):
+        """Devuelve la configuración única, creándola si no existe."""
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configuración de la aplicación"

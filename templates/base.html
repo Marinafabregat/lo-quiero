@@ -21,6 +21,7 @@
           <a href="{% url 'product_list' %}" class="nav-link" {% if request.resolver_match.url_name|slice:':7' == 'product' %}aria-current="page"{% endif %}>Productos</a>
           <a href="{% url 'inventory_list' %}" class="nav-link" {% if request.resolver_match.url_name == 'inventory_list' %}aria-current="page"{% endif %}>Inventario</a>
           <a href="{% url 'stats' %}" class="nav-link" {% if request.resolver_match.url_name == 'stats' %}aria-current="page"{% endif %}>Estadísticas</a>
+          <a href="{% url 'settings' %}" class="nav-link" {% if request.resolver_match.url_name == 'settings' or request.resolver_match.url_name == 'category_manage' %}aria-current="page"{% endif %}>Configuración</a>
           <a href="{% url 'admin:index' %}" class="nav-link">Administración</a>
         </nav>
       </div>

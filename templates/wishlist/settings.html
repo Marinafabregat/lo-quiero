@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Configuración — ¿Lo quiero?{% endblock %}
+
+{% block content %}
+  <div class="max-w-3xl mx-auto space-y-8">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Configuración</h1>
+      <p class="text-sm text-slate-500">
+        Ajusta las reglas que usa la aplicación para sugerir los tiempos de espera
+        y gestiona las categorías.
+      </p>
+    </div>
+
+    <section class="card" aria-label="Periodo de reflexión">
+      <h2 class="section-title">Periodo de reflexión</h2>
+      <p class="text-xs text-slate-500 mb-4">
+        Los días sugeridos se calculan según el precio del producto en estos tramos.
+        El borde exacto de cada umbral entra en el tramo siguiente.
+      </p>
+
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4" novalidate>
+        {% csrf_token %}
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% for field in form %}
+            {% include "wishlist/includes/field.html" with field=field %}
+          {% endfor %}
+        </div>
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" class="btn btn-primary">Guardar configuración</button>
+        </div>
+      </form>
+    </section>
+
+    <section aria-label="Categorías">
+      <h2 class="section-title">Categorías</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Renombra una categoría para corregir una errata en todos sus productos,
+        o elimínala. Al eliminar solo se quita la etiqueta: <strong>los productos no se borran</strong>.
+      </p>
+
+      {% if categories %}
+        <div class="card overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Productos</th>
+                <th>Renombrar</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in categories %}
+                <tr>
+                  <td class="font-medium">{{ item.category }}</td>
+                  <td>{{ item.count }}</td>
+                  <td>
+                    <form method="post"
+                          action="{% url 'category_rename' item.category %}"
+                          class="flex flex-wrap items-center gap-2"
+                          aria-label="Renombrar {{ item.category }}">
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="settings">
+                      <input type="text" name="name" value="{{ item.category }}"
+                             required maxlength="100" class="form-field"
+                             aria-label="Nuevo nombre de {{ item.category }}">
+                      <button type="submit" class="btn btn-ghost">Renombrar</button>
+                    </form>
+                  </td>
+                  <td>
+                    <a href="{% url 'category_delete' item.category %}?next=settings"
+                       class="link text-red-600">Eliminar</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <p class="text-lg font-medium text-slate-700">No hay categorías en uso.</p>
+          <p class="text-sm text-slate-500">Las categorías se crean al añadir productos.</p>
+          <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir un producto</a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

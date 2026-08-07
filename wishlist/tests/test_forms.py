@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from wishlist.forms import (
     AlternativeForm,
+    AppSettingsForm,
     PriceSnapshotForm,
     ProductForm,
     ReviewForm,
@@ -241,3 +242,40 @@ class PriceSnapshotFormTests(TestCase):
     def test_valid_price(self):
         form = PriceSnapshotForm(data={"price": "25.50"})
         self.assertTrue(form.is_valid(), form.errors)
+
+
+class AppSettingsFormTests(TestCase):
+    def settings_data(self, **overrides):
+        data = {
+            "price_tier_1": "15.00",
+            "waiting_days_1": "7",
+            "price_tier_2": "35.00",
+            "waiting_days_2": "15",
+            "price_tier_3": "50.00",
+            "waiting_days_3": "30",
+            "waiting_days_max": "45",
+        }
+        data.update(overrides)
+        return data
+
+    def test_valid_settings(self):
+        form = AppSettingsForm(data=self.settings_data())
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_non_increasing_tiers_are_rejected(self):
+        form = AppSettingsForm(
+            data=self.settings_data(price_tier_2="10.00", price_tier_3="20.00")
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("price_tier_3", form.errors)
+
+    def test_equal_tiers_are_rejected(self):
+        form = AppSettingsForm(
+            data=self.settings_data(price_tier_1="15.00", price_tier_2="15.00")
+        )
+        self.assertFalse(form.is_valid())
+
+    def test_negative_days_are_rejected(self):
+        form = AppSettingsForm(data=self.settings_data(waiting_days_1="-1"))
+        self.assertFalse(form.is_valid())
+        self.assertIn("waiting_days_1", form.errors)

@@ -14,13 +14,14 @@ from django.views.decorators.http import require_POST
 
 from .forms import (
     AlternativeForm,
+    AppSettingsForm,
     CategoryRenameForm,
     OwnedItemForm,
     PriceSnapshotForm,
     ProductForm,
     ReviewForm,
 )
-from .models import Alternative, OwnedItem, Product
+from .models import Alternative, AppSettings, OwnedItem, Product
 from .services import (
     best_combined_alternative,
     cheapest_alternative,
@@ -284,6 +285,14 @@ def category_manage(request):
     )
 
 
+def _category_redirect(request):
+    """Redirige a Ajustes si la acción vino de allí, si no a categorías."""
+    target = request.POST.get("next")
+    if target == "settings":
+        return redirect("settings")
+    return redirect("category_manage")
+
+
 @require_POST
 def category_rename(request, name):
     """Renombra una categoría en todos los productos que la usan."""
@@ -302,7 +311,7 @@ def category_rename(request, name):
             )
     else:
         messages.error(request, "Nombre de categoría no válido.")
-    return redirect("category_manage")
+    return _category_redirect(request)
 
 
 def category_delete(request, name):
@@ -315,7 +324,8 @@ def category_delete(request, name):
             f"Categoría «{name}» eliminada de {count} producto(s). "
             "Los productos se conservan, sin categoría.",
         )
-        return redirect("category_manage")
+        return _category_redirect(request)
+    next_target = request.GET.get("next")
     return render(
         request,
         "wishlist/confirm_delete.html",
@@ -326,10 +336,35 @@ def category_delete(request, name):
                 f"{count} producto(s) usarán esta categoría. Se eliminará "
                 "solo la etiqueta; los productos no se borran."
             ),
-            "back_url": "category_manage",
+            "back_url": "settings" if next_target == "settings" else "category_manage",
             "delete_url": "category_delete",
             "delete_arg": name,
+            "next": next_target if next_target == "settings" else "",
         },
+    )
+
+
+def settings(request):
+    """Ajustes de la aplicación: umbrales de precio y gestión de categorías."""
+    app_settings = AppSettings.load()
+    form = AppSettingsForm(request.POST or None, instance=app_settings)
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Configuración guardada.")
+            return redirect("settings")
+        messages.error(request, "Revisa los valores del formulario.")
+
+    categories = (
+        Product.objects.exclude(category="")
+        .values("category")
+        .annotate(count=Count("id"))
+        .order_by("category")
+    )
+    return render(
+        request,
+        "wishlist/settings.html",
+        {"form": form, "categories": categories},
     )
 
 

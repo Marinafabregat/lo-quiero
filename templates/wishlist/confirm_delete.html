@@ -10,6 +10,7 @@
 
       <form method="post" class="flex flex-wrap justify-center gap-3">
         {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
         <button type="submit" class="btn btn-danger">Sí, eliminar</button>
         <a href="{% if back_arg %}{% url back_url back_arg %}{% else %}{% url back_url %}{% endif %}"
            class="btn btn-ghost">Cancelar</a>

@@ -77,4 +77,5 @@ urlpatterns = [
         name="inventory_delete",
     ),
     path("estadisticas/", views.stats, name="stats"),
+    path("configuracion/", views.settings, name="settings"),
 ]

@@ -48,7 +48,7 @@ docker compose exec web python manage.py test
 
 ## Reglas de negocio (en `wishlist/services.py`)
 
-- **Periodo de reflexión** (`suggested_waiting_days`): < 15 € → 7 días; < 35 € → 15; < 50 € → 30; >= 50 € → 45. El borde exacto (15,00 € y 35,00 €) entra en el tramo siguiente.
+- **Periodo de reflexión** (`suggested_waiting_days`): < 15 € → 7 días; < 35 € → 15; < 50 € → 30; >= 50 € → 45. El borde exacto (15,00 € y 35,00 €) entra en el tramo siguiente. Umbrales y días son configurables desde Ajustes (modelo `AppSettings`, fila única; `WaitingConfig` en `services` transporta los valores).
 - **Fecha de revisión** (`compute_review_date` / `Product.save`): `fecha de creación + waiting_days`, solo al crear.
 - **Sugerencia de días**: en `ProductForm`, si el campo está vacío se aplica la sugerencia; el valor manual se respeta.
 - **Estado inicial**: al crear con `waiting_days > 0`, el estado es `waiting` (se cambia después desde la ficha).

@@ -5,7 +5,13 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from wishlist.models import Alternative, DecisionReview, OwnedItem, Product
+from wishlist.models import (
+    Alternative,
+    AppSettings,
+    DecisionReview,
+    OwnedItem,
+    Product,
+)
 
 
 class DashboardTests(TestCase):
@@ -325,3 +331,76 @@ class CategoryManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Product.objects.count(), 4)
         self.assertFalse(Product.objects.filter(category="Gadgets").exists())
+
+
+class SettingsViewTests(TestCase):
+    def test_settings_page_renders(self):
+        response = self.client.get(reverse("settings"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Periodo de reflexión")
+
+    def test_settings_page_lists_categories(self):
+        Product.objects.create(name="Mochila", category="Mochilas")
+        response = self.client.get(reverse("settings"))
+        self.assertContains(response, "Mochilas")
+
+    def test_save_settings(self):
+        response = self.client.post(
+            reverse("settings"),
+            {
+                "price_tier_1": "20.00",
+                "waiting_days_1": "10",
+                "price_tier_2": "40.00",
+                "waiting_days_2": "20",
+                "price_tier_3": "60.00",
+                "waiting_days_3": "30",
+                "waiting_days_max": "60",
+            },
+        )
+        self.assertRedirects(response, reverse("settings"))
+        settings = AppSettings.load()
+        self.assertEqual(settings.price_tier_1, Decimal("20.00"))
+        self.assertEqual(settings.waiting_days_1, 10)
+        self.assertEqual(settings.waiting_days_max, 60)
+
+    def test_save_settings_rejects_non_increasing_tiers(self):
+        response = self.client.post(
+            reverse("settings"),
+            {
+                "price_tier_1": "50.00",
+                "waiting_days_1": "10",
+                "price_tier_2": "40.00",
+                "waiting_days_2": "20",
+                "price_tier_3": "60.00",
+                "waiting_days_3": "30",
+                "waiting_days_max": "60",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        settings = AppSettings.load()
+        self.assertEqual(settings.price_tier_1, Decimal("15.00"))
+
+    def test_rename_category_from_settings_returns_to_settings(self):
+        Product.objects.create(name="Mochila", category="Mochilas")
+        response = self.client.post(
+            reverse("category_rename", args=["Mochilas"]),
+            {"name": "Equipaje", "next": "settings"},
+        )
+        self.assertRedirects(response, reverse("settings"))
+        self.assertEqual(Product.objects.filter(category="Equipaje").count(), 1)
+
+    def test_delete_category_from_settings_returns_to_settings(self):
+        Product.objects.create(name="Mochila", category="Mochilas")
+        response = self.client.post(
+            reverse("category_delete", args=["Mochilas"]),
+            {"next": "settings"},
+        )
+        self.assertRedirects(response, reverse("settings"))
+        self.assertEqual(Product.objects.filter(category="").count(), 1)
+
+    def test_confirm_delete_from_settings_keeps_next(self):
+        Product.objects.create(name="Mochila", category="Mochilas")
+        response = self.client.get(
+            reverse("category_delete", args=["Mochilas"]), {"next": "settings"}
+        )
+        self.assertContains(response, 'name="next" value="settings"')

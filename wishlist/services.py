@@ -18,25 +18,56 @@ from .models import Product
 # ---------------------------------------------------------------------------
 
 
-def suggested_waiting_days(price: Decimal | None) -> int:
+@dataclass(frozen=True)
+class WaitingConfig:
+    """Tramos de precio y días de espera configurables desde Ajustes."""
+
+    tier_1_price: Decimal = Decimal("15.00")
+    tier_1_days: int = 7
+    tier_2_price: Decimal = Decimal("35.00")
+    tier_2_days: int = 15
+    tier_3_price: Decimal = Decimal("50.00")
+    tier_3_days: int = 30
+    tier_max_days: int = 45
+
+
+def waiting_config(settings) -> WaitingConfig:
+    """Convierte una instancia de ``AppSettings`` en ``WaitingConfig``."""
+    return WaitingConfig(
+        tier_1_price=settings.price_tier_1,
+        tier_1_days=settings.waiting_days_1,
+        tier_2_price=settings.price_tier_2,
+        tier_2_days=settings.waiting_days_2,
+        tier_3_price=settings.price_tier_3,
+        tier_3_days=settings.waiting_days_3,
+        tier_max_days=settings.waiting_days_max,
+    )
+
+
+def suggested_waiting_days(
+    price: Decimal | None, config: WaitingConfig | None = None
+) -> int:
     """Días de reflexión recomendados según el precio.
 
-    - Menos de 15 €: 7 días.
-    - Entre 15,00 € y 35 €: 15 días (borde 15,00 € incluido).
-    - Entre 35,00 € y 50 €: 30 días (borde 35,00 € incluido).
-    - 50 € o más: 45 días.
+    - Menos del primer umbral (15 € por defecto): 7 días.
+    - Entre el primer y segundo umbral: 15 días (borde inferior incluido).
+    - Entre el segundo y tercer umbral: 30 días (borde inferior incluido).
+    - Tercer umbral (50 €) o más: 45 días.
+
+    Los umbrales y días se pueden ajustar desde Ajustes.
     """
+    cfg = config or WaitingConfig()
     if price is None:
-        return 7
+        return cfg.tier_1_days
     if price < 0:
         raise ValueError("El precio no puede ser negativo.")
-    if price < Decimal("15"):
-        return 7
-    if price < Decimal("35"):
-        return 15
-    if price < Decimal("50"):
-        return 30
-    return 45
+    if price < cfg.tier_1_price:
+        return cfg.tier_1_days
+    if price < cfg.tier_2_price:
+        return cfg.tier_2_days
+    if price < cfg.tier_3_price:
+        return cfg.tier_3_days
+    return cfg.tier_max_days
 
 
 def compute_review_date(reference_date: date, waiting_days: int) -> date:
@@ -236,7 +267,7 @@ def _average_days(queryset, finished_field):
         finished = row.finished_date
         if finished is None:
             continue
-        total_days += (finished - row.created_at.date()).days
+        total_days += abs((finished - row.created_at.date()).days)
         count += 1
     if count == 0:
         return None

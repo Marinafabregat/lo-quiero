@@ -1,10 +1,13 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
+from django.utils import timezone
 
-from wishlist.models import Alternative
+from wishlist.models import Alternative, Product
 from wishlist.services import (
+    WaitingConfig,
+    _average_days,
     combined_score,
     compute_review_date,
     price_comparison,
@@ -87,6 +90,36 @@ class PurchaseRecommendationTests(SimpleTestCase):
             purchase_recommendation(5, 11)
 
 
+class SuggestedWaitingDaysConfigTests(SimpleTestCase):
+    def test_custom_config_overrides_defaults(self):
+        config = WaitingConfig(
+            tier_1_price=Decimal("10.00"),
+            tier_1_days=3,
+            tier_2_price=Decimal("20.00"),
+            tier_2_days=5,
+            tier_3_price=Decimal("40.00"),
+            tier_3_days=10,
+            tier_max_days=20,
+        )
+        self.assertEqual(suggested_waiting_days(Decimal("5.00"), config), 3)
+        self.assertEqual(suggested_waiting_days(Decimal("15.00"), config), 5)
+        self.assertEqual(suggested_waiting_days(Decimal("30.00"), config), 10)
+        self.assertEqual(suggested_waiting_days(Decimal("50.00"), config), 20)
+
+    def test_none_price_uses_lowest_tier(self):
+        config = WaitingConfig(tier_1_price=Decimal("10.00"), tier_1_days=3)
+        self.assertEqual(suggested_waiting_days(None, config), 3)
+
+    def test_boundary_goes_to_next_tier(self):
+        config = WaitingConfig(
+            tier_1_price=Decimal("10.00"),
+            tier_1_days=3,
+            tier_2_price=Decimal("20.00"),
+            tier_2_days=5,
+        )
+        self.assertEqual(suggested_waiting_days(Decimal("10.00"), config), 5)
+
+
 class PriceComparisonTests(SimpleTestCase):
     def test_savings_when_alternative_is_cheaper(self):
         difference, savings = price_comparison(Decimal("100.00"), Decimal("75.00"))
@@ -132,3 +165,20 @@ class CombinedScoreTests(SimpleTestCase):
             + Decimal("0.25") * Decimal("6")
         )
         self.assertEqual(combined_score(alternative), expected)
+
+
+class AverageDaysTests(TestCase):
+    def test_average_days_is_never_negative(self):
+        purchased = Product.objects.create(
+            name="Comprado",
+            status=Product.Status.PURCHASED,
+            purchased_at=timezone.now() - timedelta(days=30),
+        )
+        avg = _average_days(Product.objects.filter(pk=purchased.pk), "purchased_at")
+        self.assertIsNotNone(avg)
+        self.assertGreaterEqual(avg, 0)
+
+    def test_average_days_ignores_products_without_finish_date(self):
+        waiting = Product.objects.create(name="En espera")
+        avg = _average_days(Product.objects.filter(pk=waiting.pk), "purchased_at")
+        self.assertIsNone(avg)

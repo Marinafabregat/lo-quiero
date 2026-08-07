@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from wishlist.models import (
     Alternative,
+    AppSettings,
     DecisionReview,
     OwnedItem,
     PriceSnapshot,
@@ -38,6 +39,7 @@ class Command(BaseCommand):
             Alternative.objects.all().delete()
             OwnedItem.objects.all().delete()
             Product.objects.all().delete()
+            AppSettings.objects.all().delete()
             self.stdout.write("  - Datos de demostración anteriores borrados.")
 
         admin, created = User.objects.get_or_create(
@@ -48,6 +50,9 @@ class Command(BaseCommand):
             admin.set_password("admin")
             admin.save()
             self.stdout.write("  + Superusuario: admin (admin/admin)")
+
+        AppSettings.load()
+        self.stdout.write("  = Configuración por defecto (periodo de reflexión).")
 
         auriculares, created = Product.objects.get_or_create(
             name="Auriculares inalámbricos Sony WH-1000XM5",
