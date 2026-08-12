@@ -28,38 +28,44 @@
   </form>
 
   {% if items %}
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nombre</th><th>Categoría</th><th>Estado</th><th>Frecuencia de uso</th>
-            <th>Último uso</th><th>Precio de compra</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in items %}
-            <tr>
-              <td class="font-medium">{{ item.name }}</td>
-              <td>{% if item.category %}{{ item.category }}{% else %}—{% endif %}</td>
-              <td>{{ item.get_condition_display }}</td>
-              <td>{{ item.get_usage_frequency_display }}</td>
-              <td>
-                {% if item.last_used_at %}
-                  {{ item.last_used_at|date:"d/m/Y" }}
-                  {% if item.usage_frequency == 'never' %}<span class="badge bg-red-100 text-red-700 border-red-200 ml-1">Sin uso</span>{% endif %}
-                {% else %}—{% endif %}
-              </td>
-              <td>{% if item.purchase_price is not None %}{{ item.purchase_price|floatformat:2 }} €{% else %}—{% endif %}</td>
-              <td>
-                <div class="flex gap-2 justify-end">
-                  <a href="{% url 'inventory_edit' item.pk %}" class="link">Editar</a>
-                  <a href="{% url 'inventory_delete' item.pk %}" class="link text-red-600">Eliminar</a>
-                </div>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {% for item in items %}
+        <div class="card">
+          <div class="flex items-center gap-2">
+            {% if item.image_url %}
+              <a href="{{ item.image_url }}" target="_blank" rel="noopener noreferrer"
+                 class="shrink-0 block">
+                <img src="{{ item.image_url }}" alt="Imagen de {{ item.name }}"
+                     class="h-14 w-14 rounded-lg object-cover border border-slate-200"
+                     loading="lazy">
+              </a>
+            {% endif %}
+            <div class="min-w-0">
+              <h3 class="font-semibold text-slate-900 leading-snug">{{ item.name }}</h3>
+              <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                {% if item.category %}<span>{{ item.category }}</span>{% endif %}
+                {% if item.purchase_date %}
+                  <span>Compra: {{ item.purchase_date|date:"d/m/Y" }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% if item.description or item.notes %}
+            <p class="mt-2 text-sm text-slate-500 line-clamp-2">{{ item.description }}{% if item.description and item.notes %} {% endif %}{{ item.notes }}</p>
+          {% endif %}
+          <div class="mt-2 flex items-center justify-between gap-2 text-sm">
+            <div>
+              {% if item.url %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="link">Ver dónde se compró</a>
+              {% endif %}
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <a href="{% url 'inventory_edit' item.pk %}" class="link">Editar</a>
+              <a href="{% url 'inventory_delete' item.pk %}" class="link text-red-600">Eliminar</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
   {% else %}
     <div class="empty-state">

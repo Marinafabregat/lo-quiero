@@ -40,8 +40,10 @@
     <section aria-label="Categorías">
       <h2 class="section-title">Categorías</h2>
       <p class="text-sm text-slate-500 mb-4">
-        Renombra una categoría para corregir una errata en todos sus productos,
-        o elimínala. Al eliminar solo se quita la etiqueta: <strong>los productos no se borran</strong>.
+        Las categorías son globales: se comparten entre productos e inventario.
+        Renombra una para corregir una errata en todos sus productos y objetos,
+        o elimínala. Al eliminar solo se quita la etiqueta:
+        <strong>los registros no se borran</strong>.
       </p>
 
       {% if categories %}
@@ -51,6 +53,7 @@
               <tr>
                 <th>Categoría</th>
                 <th>Productos</th>
+                <th>Objetos</th>
                 <th>Renombrar</th>
                 <th></th>
               </tr>
@@ -59,7 +62,8 @@
               {% for item in categories %}
                 <tr>
                   <td class="font-medium">{{ item.category }}</td>
-                  <td>{{ item.count }}</td>
+                  <td>{{ item.products }}</td>
+                  <td>{{ item.owned }}</td>
                   <td>
                     <form method="post"
                           action="{% url 'category_rename' item.category %}"
@@ -85,7 +89,7 @@
       {% else %}
         <div class="empty-state">
           <p class="text-lg font-medium text-slate-700">No hay categorías en uso.</p>
-          <p class="text-sm text-slate-500">Las categorías se crean al añadir productos.</p>
+          <p class="text-sm text-slate-500">Las categorías se crean al añadir productos u objetos.</p>
           <a href="{% url 'product_create' %}" class="btn btn-primary mt-3">Añadir un producto</a>
         </div>
       {% endif %}

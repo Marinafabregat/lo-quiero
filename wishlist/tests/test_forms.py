@@ -5,11 +5,12 @@ from django.test import TestCase
 from wishlist.forms import (
     AlternativeForm,
     AppSettingsForm,
+    OwnedItemForm,
     PriceSnapshotForm,
     ProductForm,
     ReviewForm,
 )
-from wishlist.models import Product
+from wishlist.models import OwnedItem, Product
 
 
 def product_form_data(**overrides):
@@ -98,11 +99,17 @@ class ProductFormTests(TestCase):
 class ProductCategoryFormTests(TestCase):
     def setUp(self):
         Product.objects.create(name="Mochila", category="Mochilas")
+        OwnedItem.objects.create(name="Crema facial", category="Skincare")
 
     def test_dropdown_includes_existing_categories(self):
         form = ProductForm()
         choices = [value for value, _ in form.fields["category"].widget.choices]
         self.assertIn("Mochilas", choices)
+
+    def test_dropdown_includes_owned_item_categories(self):
+        form = ProductForm()
+        choices = [value for value, _ in form.fields["category"].widget.choices]
+        self.assertIn("Skincare", choices)
 
     def test_dropdown_includes_create_option(self):
         form = ProductForm()
@@ -133,6 +140,73 @@ class ProductCategoryFormTests(TestCase):
         form = ProductForm(instance=product)
         choices = [value for value, _ in form.fields["category"].widget.choices]
         self.assertIn("Herramientas", choices)
+
+
+class OwnedItemFormTests(TestCase):
+    def setUp(self):
+        Product.objects.create(name="Mochila", category="Mochilas")
+        OwnedItem.objects.create(name="Crema facial", category="Skincare")
+
+    def test_dropdown_includes_global_categories(self):
+        form = OwnedItemForm()
+        choices = [value for value, _ in form.fields["category"].widget.choices]
+        self.assertIn("Skincare", choices)
+        self.assertIn("Mochilas", choices)
+
+    def test_dropdown_includes_create_option(self):
+        form = OwnedItemForm()
+        choices = [value for value, _ in form.fields["category"].widget.choices]
+        self.assertIn("__new__", choices)
+
+    def test_creating_new_category(self):
+        form = OwnedItemForm(
+            data={
+                "name": "Crema hidratante",
+                "category": "__new__",
+                "new_category": "Skincare",
+                "description": "",
+                "url": "",
+                "image_url": "",
+                "purchase_date": "",
+                "notes": "",
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save()
+        self.assertEqual(item.category, "Skincare")
+
+    def test_new_category_requires_a_name(self):
+        form = OwnedItemForm(
+            data={
+                "name": "Crema hidratante",
+                "category": "__new__",
+                "new_category": "",
+                "description": "",
+                "url": "",
+                "image_url": "",
+                "purchase_date": "",
+                "notes": "",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("new_category", form.errors)
+
+    def test_existing_category_is_kept(self):
+        form = OwnedItemForm(
+            data={
+                "name": "Crema hidratante",
+                "category": "Skincare",
+                "new_category": "",
+                "description": "",
+                "url": "",
+                "image_url": "",
+                "purchase_date": "",
+                "notes": "",
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save()
+        self.assertEqual(item.category, "Skincare")
 
 
 class AlternativeFormTests(TestCase):

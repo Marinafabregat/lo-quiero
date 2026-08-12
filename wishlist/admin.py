@@ -133,12 +133,9 @@ class OwnedItemAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "category",
-        "condition",
-        "usage_frequency",
         "purchase_date",
-        "last_used_at",
     ]
-    list_filter = ["category", "condition", "usage_frequency"]
+    list_filter = ["category"]
     search_fields = ["name", "description", "notes", "category"]
 
 

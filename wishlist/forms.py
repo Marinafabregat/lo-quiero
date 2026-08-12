@@ -2,6 +2,7 @@
 
 from django import forms
 
+from .categories import all_categories
 from .models import (
     Alternative,
     AppSettings,
@@ -92,13 +93,7 @@ class ProductForm(forms.ModelForm):
         self._set_category_choices()
 
     def _existing_categories(self):
-        categories = (
-            Product.objects.exclude(category="")
-            .values_list("category", flat=True)
-            .distinct()
-            .order_by("category")
-        )
-        return list(categories)
+        return list(all_categories())
 
     def _set_category_choices(self):
         categories = self._existing_categories()
@@ -249,43 +244,71 @@ class ReviewForm(forms.ModelForm):
 
 
 class OwnedItemForm(forms.ModelForm):
+    CATEGORY_NEW = "__new__"
+
+    new_category = forms.CharField(
+        label="Nueva categoría",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-field",
+                "placeholder": "Escribe el nombre de la nueva categoría…",
+            }
+        ),
+    )
+
     class Meta:
         model = OwnedItem
         fields = [
             "name",
             "category",
             "description",
-            "condition",
-            "usage_frequency",
+            "url",
+            "image_url",
             "purchase_date",
-            "purchase_price",
-            "last_used_at",
             "notes",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-field"}),
-            "category": forms.TextInput(attrs={"class": "form-field"}),
+            "category": forms.Select(attrs={"class": "form-field"}),
             "description": forms.Textarea(attrs={"class": "form-field", "rows": 3}),
-            "purchase_price": forms.NumberInput(
-                attrs={"class": "form-field", "step": "0.01"}
-            ),
+            "url": forms.URLInput(attrs={"class": "form-field"}),
+            "image_url": forms.URLInput(attrs={"class": "form-field"}),
             "purchase_date": forms.DateInput(
-                attrs={"class": "form-field", "type": "date"}
-            ),
-            "last_used_at": forms.DateInput(
                 attrs={"class": "form-field", "type": "date"}
             ),
             "notes": forms.Textarea(attrs={"class": "form-field", "rows": 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._set_category_choices()
+
+    def _set_category_choices(self):
+        categories = list(all_categories())
+        current = self.instance.category
+        if current and current not in categories:
+            categories.insert(0, current)
+        options = [("", "Sin categoría")]
+        options.extend((category, category) for category in categories)
+        options.append((self.CATEGORY_NEW, "Otra categoría…"))
+        self.fields["category"].widget.choices = options
+
     def clean(self):
         cleaned = super().clean()
-        if (
-            cleaned
-            and cleaned.get("purchase_price") is not None
-            and cleaned["purchase_price"] < 0
-        ):
-            self.add_error("purchase_price", "El precio no puede ser negativo.")
+        if cleaned is None:
+            return cleaned
+        category = cleaned.get("category")
+        if category == self.CATEGORY_NEW:
+            new_category = (cleaned.get("new_category") or "").strip()
+            if not new_category:
+                self.add_error(
+                    "new_category", "Escribe el nombre de la nueva categoría."
+                )
+                category = ""
+            else:
+                category = new_category
+            cleaned["category"] = category
         return cleaned
 
 

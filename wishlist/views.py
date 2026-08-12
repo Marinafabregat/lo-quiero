@@ -8,10 +8,15 @@ from decimal import Decimal
 from itertools import chain
 
 from django.contrib import messages
-from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from .categories import (
+    all_categories,
+    categories_with_counts,
+    delete_category,
+    rename_category,
+)
 from .forms import (
     AlternativeForm,
     AppSettingsForm,
@@ -123,12 +128,7 @@ def product_list(request):
     }.get(order, "-created_at")
     products = products.order_by(ordering)
 
-    categories = (
-        Product.objects.exclude(category="")
-        .values_list("category", flat=True)
-        .distinct()
-        .order_by("category")
-    )
+    categories = all_categories()
 
     context = {
         "products": products,
@@ -271,13 +271,8 @@ def product_postpone(request, pk):
 
 
 def category_manage(request):
-    """Lista las categorías en uso con opciones de renombrar o eliminar."""
-    categories = (
-        Product.objects.exclude(category="")
-        .values("category")
-        .annotate(count=Count("id"))
-        .order_by("category")
-    )
+    """Lista las categorías globales con opciones de renombrar o eliminar."""
+    categories = categories_with_counts()
     return render(
         request,
         "wishlist/category_manage.html",
@@ -295,7 +290,7 @@ def _category_redirect(request):
 
 @require_POST
 def category_rename(request, name):
-    """Renombra una categoría en todos los productos que la usan."""
+    """Renombra una categoría global en productos e inventario."""
     form = CategoryRenameForm(request.POST)
     if form.is_valid():
         new_name = form.cleaned_data["name"].strip()
@@ -304,10 +299,11 @@ def category_rename(request, name):
         elif new_name.lower() == name.lower():
             messages.info(request, "El nombre no ha cambiado.")
         else:
-            count = Product.objects.filter(category=name).update(category=new_name)
+            product_count, owned_count = rename_category(name, new_name)
             messages.success(
                 request,
-                f"Categoría «{name}» renombrada a «{new_name}» en {count} producto(s).",
+                f"Categoría «{name}» renombrada a «{new_name}» "
+                f"en {product_count} producto(s) y {owned_count} objeto(s).",
             )
     else:
         messages.error(request, "Nombre de categoría no válido.")
@@ -315,17 +311,21 @@ def category_rename(request, name):
 
 
 def category_delete(request, name):
-    """Elimina una categoría conservando los productos (quedan sin ella)."""
-    count = Product.objects.filter(category=name).count()
+    """Elimina una categoría global conservando productos y objetos."""
+    product_count, owned_count = (
+        Product.objects.filter(category=name).count(),
+        OwnedItem.objects.filter(category=name).count(),
+    )
     if request.method == "POST":
-        Product.objects.filter(category=name).update(category="")
+        delete_category(name)
         messages.success(
             request,
-            f"Categoría «{name}» eliminada de {count} producto(s). "
-            "Los productos se conservan, sin categoría.",
+            f"Categoría «{name}» eliminada de {product_count} producto(s) "
+            f"y {owned_count} objeto(s). Los registros se conservan, sin categoría.",
         )
         return _category_redirect(request)
     next_target = request.GET.get("next")
+    total = product_count + owned_count
     return render(
         request,
         "wishlist/confirm_delete.html",
@@ -333,8 +333,9 @@ def category_delete(request, name):
             "title": "Eliminar categoría",
             "object_name": name,
             "detail": (
-                f"{count} producto(s) usarán esta categoría. Se eliminará "
-                "solo la etiqueta; los productos no se borran."
+                f"{total} registro(s) ({product_count} producto(s) y "
+                f"{owned_count} objeto(s)) usan esta categoría. Se eliminará "
+                "solo la etiqueta; los registros no se borran."
             ),
             "back_url": "settings" if next_target == "settings" else "category_manage",
             "delete_url": "category_delete",
@@ -355,12 +356,7 @@ def settings(request):
             return redirect("settings")
         messages.error(request, "Revisa los valores del formulario.")
 
-    categories = (
-        Product.objects.exclude(category="")
-        .values("category")
-        .annotate(count=Count("id"))
-        .order_by("category")
-    )
+    categories = categories_with_counts()
     return render(
         request,
         "wishlist/settings.html",
@@ -489,12 +485,7 @@ def inventory_list(request):
     category = request.GET.get("category", "")
     if category:
         items = items.filter(category__iexact=category)
-    categories = (
-        OwnedItem.objects.exclude(category="")
-        .values_list("category", flat=True)
-        .distinct()
-        .order_by("category")
-    )
+    categories = all_categories()
     return render(
         request,
         "wishlist/inventory_list.html",
@@ -514,7 +505,7 @@ def inventory_create(request):
     return render(
         request,
         "wishlist/inventory_form.html",
-        {"form": form, "title": "Nuevo objeto"},
+        {"form": form, "title": "Nuevo objeto", "submit_label": "Crear"},
     )
 
 
@@ -531,7 +522,12 @@ def inventory_edit(request, pk):
     return render(
         request,
         "wishlist/inventory_form.html",
-        {"form": form, "title": f"Editar «{item.name}»", "item": item},
+        {
+            "form": form,
+            "title": f"Editar «{item.name}»",
+            "submit_label": "Guardar",
+            "item": item,
+        },
     )
 
 

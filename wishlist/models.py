@@ -234,47 +234,13 @@ class DecisionReview(models.Model):
 class OwnedItem(models.Model):
     """Objeto que ya se posee y puede cubrir la misma necesidad."""
 
-    class Condition(models.TextChoices):
-        NEW = "new", "Nuevo"
-        LIKE_NEW = "like_new", "Como nuevo"
-        GOOD = "good", "Buen estado"
-        FAIR = "fair", "Aceptable"
-        POOR = "poor", "Mal estado"
-
-    class UsageFrequency(models.TextChoices):
-        DAILY = "daily", "A diario"
-        WEEKLY = "weekly", "Cada semana"
-        MONTHLY = "monthly", "Cada mes"
-        RARELY = "rarely", "Rara vez"
-        NEVER = "never", "Nunca"
-
     name = models.CharField("nombre", max_length=200)
     category = models.CharField("categoría", max_length=100, blank=True)
     description = models.TextField("descripción", blank=True)
-
-    condition = models.CharField(
-        "estado",
-        max_length=20,
-        choices=Condition.choices,
-        default=Condition.GOOD,
-    )
-    usage_frequency = models.CharField(
-        "frecuencia de uso",
-        max_length=20,
-        choices=UsageFrequency.choices,
-        default=UsageFrequency.RARELY,
-    )
+    url = models.URLField("web de compra", blank=True)
+    image_url = models.URLField("URL de imagen", blank=True)
 
     purchase_date = models.DateField("fecha de compra", null=True, blank=True)
-    purchase_price = models.DecimalField(
-        "precio de compra",
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(Decimal("0"))],
-    )
-    last_used_at = models.DateField("último uso", null=True, blank=True)
     notes = models.TextField("notas", blank=True)
 
     created_at = models.DateTimeField("creado", auto_now_add=True)

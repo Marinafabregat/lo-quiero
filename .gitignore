@@ -24,6 +24,9 @@ data/*
 .coverage
 htmlcov/
 
+# Notas personales (no se suben al repositorio)
+notas-uso-local.md
+
 # Node y Tailwind
 node_modules/
 

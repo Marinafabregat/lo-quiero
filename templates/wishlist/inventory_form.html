@@ -3,7 +3,10 @@
 
 {% block content %}
   <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold text-slate-900 mb-6">{{ title }}</h1>
+    <h1 class="text-2xl font-bold text-slate-900 mb-1">{{ title }}</h1>
+    <p class="text-sm text-slate-500 mb-6">
+      Guarda los objetos que ya posees para descubrir si cubren la misma necesidad que un producto que quieres comprar.
+    </p>
 
     <form method="post" class="card space-y-4" novalidate>
       {% csrf_token %}
@@ -13,13 +16,43 @@
         </div>
       {% endif %}
       {% for field in form %}
-        {% include "wishlist/includes/field.html" with field=field %}
+        {% if field.name == 'category' %}
+          {% include "wishlist/includes/field.html" with field=field %}
+          <div id="new-category-field" hidden>
+            {% include "wishlist/includes/field.html" with field=form.new_category %}
+          </div>
+        {% elif field.name == 'new_category' %}
+          {# Se muestra junto a la categoría #}
+        {% else %}
+          {% include "wishlist/includes/field.html" with field=field %}
+        {% endif %}
       {% endfor %}
 
       <div class="flex items-center gap-3 pt-2">
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
         <a href="{% url 'inventory_list' %}" class="btn btn-ghost">Cancelar</a>
       </div>
     </form>
   </div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var categorySelect = document.querySelector('[name="category"]');
+    var newCategoryField = document.getElementById('new-category-field');
+    if (!categorySelect || !newCategoryField) return;
+
+    function toggleNewCategory() {
+      var show = categorySelect.value === '__new__';
+      newCategoryField.hidden = !show;
+      if (show) {
+        var input = newCategoryField.querySelector('input');
+        if (input) input.focus();
+      }
+    }
+    categorySelect.addEventListener('change', toggleNewCategory);
+    toggleNewCategory();
+  });
+</script>
 {% endblock %}

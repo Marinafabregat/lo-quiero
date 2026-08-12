@@ -247,11 +247,9 @@ class InventoryViewsTests(TestCase):
                 "name": "Auriculares con cable",
                 "category": "Auriculares",
                 "description": "",
-                "condition": "good",
-                "usage_frequency": "weekly",
+                "url": "https://example.com/auriculares",
+                "image_url": "https://example.com/auriculares.jpg",
                 "purchase_date": "2025-01-01",
-                "purchase_price": "19.90",
-                "last_used_at": "2026-01-01",
                 "notes": "",
             },
         )
@@ -284,6 +282,7 @@ class CategoryManagementTests(TestCase):
         self.mochila = Product.objects.create(name="Mochila", category="Mochilas")
         self.bolso = Product.objects.create(name="Bolso", category="Mochilas")
         Product.objects.create(name="Auriculares", category="Auriculares")
+        OwnedItem.objects.create(name="Crema facial", category="Skincare")
 
     def test_manage_page_lists_categories(self):
         response = self.client.get(reverse("category_manage"))
@@ -291,13 +290,20 @@ class CategoryManagementTests(TestCase):
         self.assertContains(response, "Mochilas")
         self.assertContains(response, "Auriculares")
 
+    def test_manage_page_lists_inventory_categories(self):
+        response = self.client.get(reverse("category_manage"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Skincare")
+
     def test_manage_page_accessible_when_empty(self):
         Product.objects.all().delete()
+        OwnedItem.objects.all().delete()
         response = self.client.get(reverse("category_manage"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No hay categorías")
 
-    def test_rename_category_updates_products(self):
+    def test_rename_category_updates_products_and_owned_items(self):
+        OwnedItem.objects.create(name="Mochila pequeña", category="Mochilas")
         response = self.client.post(
             reverse("category_rename", args=["Mochilas"]),
             {"name": "Equipaje"},
@@ -305,6 +311,8 @@ class CategoryManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Product.objects.filter(category="Equipaje").count(), 2)
         self.assertFalse(Product.objects.filter(category="Mochilas").exists())
+        self.assertEqual(OwnedItem.objects.filter(category="Equipaje").count(), 1)
+        self.assertFalse(OwnedItem.objects.filter(category="Mochilas").exists())
 
     def test_rename_to_same_name_is_a_noop(self):
         response = self.client.post(
@@ -319,11 +327,14 @@ class CategoryManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mochilas")
 
-    def test_delete_category_keeps_products(self):
+    def test_delete_category_keeps_products_and_owned_items(self):
+        OwnedItem.objects.create(name="Mochila pequeña", category="Mochilas")
         response = self.client.post(reverse("category_delete", args=["Mochilas"]))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Product.objects.count(), 3)
         self.assertEqual(Product.objects.filter(category="").count(), 2)
+        self.assertEqual(OwnedItem.objects.count(), 2)
+        self.assertEqual(OwnedItem.objects.filter(category="").count(), 1)
 
     def test_delete_unused_category(self):
         Product.objects.create(name="Gadget", category="Gadgets")
@@ -343,6 +354,11 @@ class SettingsViewTests(TestCase):
         Product.objects.create(name="Mochila", category="Mochilas")
         response = self.client.get(reverse("settings"))
         self.assertContains(response, "Mochilas")
+
+    def test_settings_page_lists_inventory_categories(self):
+        OwnedItem.objects.create(name="Crema facial", category="Skincare")
+        response = self.client.get(reverse("settings"))
+        self.assertContains(response, "Skincare")
 
     def test_save_settings(self):
         response = self.client.post(

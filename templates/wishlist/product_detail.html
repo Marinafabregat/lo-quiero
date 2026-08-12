@@ -132,7 +132,7 @@
           <ul class="space-y-1 text-sm text-amber-900">
             {% for item in owned_items %}
               <li>• {{ item.name }}
-                {% if item.last_used_at %}<span class="text-amber-700">(último uso: {{ item.last_used_at|date:"d/m/Y" }})</span>{% endif %}
+                {% if item.purchase_date %}<span class="text-amber-700">(compra: {{ item.purchase_date|date:"d/m/Y" }})</span>{% endif %}
               </li>
             {% endfor %}
           </ul>
