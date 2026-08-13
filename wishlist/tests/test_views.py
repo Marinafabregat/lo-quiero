@@ -261,6 +261,57 @@ class InventoryViewsTests(TestCase):
         response = self.client.get(reverse("inventory_list"))
         self.assertContains(response, "Auriculares con cable")
 
+    def test_inventory_list_shows_replacement_and_products(self):
+        producto = Product.objects.create(name="Auriculares inalámbricos")
+        OwnedItem.objects.create(name="Auriculares con cable")
+        OwnedItem.objects.create(name="Altavoz", replacement=producto)
+        response = self.client.get(reverse("inventory_list"))
+        self.assertContains(response, "Auriculares inalámbricos")
+        self.assertContains(response, "Comprar de nuevo")
+
+    def test_inventory_set_replacement(self):
+        producto = Product.objects.create(name="Auriculares inalámbricos")
+        item = OwnedItem.objects.create(name="Auriculares con cable")
+        response = self.client.post(
+            reverse("inventory_set_replacement", args=[item.pk]),
+            {"replacement": producto.pk},
+        )
+        self.assertEqual(response.status_code, 302)
+        item.refresh_from_db()
+        self.assertEqual(item.replacement, producto)
+        self.assertFalse(item.buy_again)
+
+    def test_inventory_clear_replacement(self):
+        producto = Product.objects.create(name="Auriculares inalámbricos")
+        item = OwnedItem.objects.create(
+            name="Auriculares con cable", replacement=producto
+        )
+        response = self.client.post(
+            reverse("inventory_set_replacement", args=[item.pk]),
+            {"replacement": ""},
+        )
+        self.assertEqual(response.status_code, 302)
+        item.refresh_from_db()
+        self.assertIsNone(item.replacement)
+        self.assertFalse(item.buy_again)
+
+    def test_inventory_buy_again_marks_item(self):
+        item = OwnedItem.objects.create(
+            name="Mochila de trekking",
+            category="Mochilas",
+            url="https://example.com/mochila",
+            image_url="https://example.com/mochila.jpg",
+        )
+        response = self.client.post(
+            reverse("inventory_set_replacement", args=[item.pk]),
+            {"buy_again": "on"},
+        )
+        self.assertEqual(response.status_code, 302)
+        item.refresh_from_db()
+        self.assertTrue(item.buy_again)
+        self.assertIsNone(item.replacement)
+        self.assertFalse(Product.objects.filter(name="Mochila de trekking").exists())
+
 
 class PageAccessTests(TestCase):
     def test_main_pages_are_accessible(self):

@@ -481,15 +481,21 @@ def price_snapshot_create(request, pk):
 
 
 def inventory_list(request):
-    items = OwnedItem.objects.all()
+    items = OwnedItem.objects.select_related("replacement")
     category = request.GET.get("category", "")
     if category:
         items = items.filter(category__iexact=category)
     categories = all_categories()
+    products = Product.objects.order_by("name")
     return render(
         request,
         "wishlist/inventory_list.html",
-        {"items": items, "categories": categories, "current_category": category},
+        {
+            "items": items,
+            "categories": categories,
+            "current_category": category,
+            "products": products,
+        },
     )
 
 
@@ -550,6 +556,32 @@ def inventory_delete(request, pk):
             "delete_arg": pk,
         },
     )
+
+
+@require_POST
+def inventory_set_replacement(request, pk):
+    """Asigna la siguiente compra: un sustituto o la marca «comprar de nuevo»."""
+    item = get_object_or_404(OwnedItem, pk=pk)
+    if request.POST.get("buy_again"):
+        item.buy_again = True
+        item.replacement = None
+        item.save(update_fields=["buy_again", "replacement"])
+        messages.success(request, f"«{item.name}» marcado para comprar de nuevo.")
+    else:
+        item.buy_again = False
+        product_id = request.POST.get("replacement", "")
+        if product_id:
+            replacement = get_object_or_404(Product, pk=product_id)
+            item.replacement = replacement
+            messages.success(
+                request,
+                f"«{replacement.name}» marcado como siguiente compra de «{item.name}».",
+            )
+        else:
+            item.replacement = None
+            messages.info(request, f"Siguiente compra de «{item.name}» eliminada.")
+        item.save(update_fields=["buy_again", "replacement"])
+    return redirect("inventory_list")
 
 
 # ---------------------------------------------------------------------------

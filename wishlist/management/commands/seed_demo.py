@@ -275,21 +275,25 @@ class Command(BaseCommand):
                 "purchase_date": today - timedelta(days=400),
                 "url": "https://example.com/auriculares",
                 "image_url": "https://example.com/auriculares.jpg",
+                "replacement": auriculares,
             },
             {
                 "name": "Mochila de trekking 30L",
                 "category": "Mochilas",
                 "purchase_date": today - timedelta(days=800),
+                "replacement": mochila,
             },
             {
                 "name": "Teclado de membrana",
                 "category": "Teclados",
                 "purchase_date": today - timedelta(days=500),
+                "replacement": teclado,
             },
             {
                 "name": "Altavoz bluetooth pequeño",
                 "category": "Ocio",
                 "purchase_date": today - timedelta(days=300),
+                "buy_again": True,
             },
             {
                 "name": "Silla de comedor con respaldo rígido",

@@ -53,12 +53,8 @@ def rename_category(old_name, new_name):
 
     Devuelve una tupla (productos, objetos) con los registros afectados.
     """
-    product_count = Product.objects.filter(category=old_name).update(
-        category=new_name
-    )
-    owned_count = OwnedItem.objects.filter(category=old_name).update(
-        category=new_name
-    )
+    product_count = Product.objects.filter(category=old_name).update(category=new_name)
+    owned_count = OwnedItem.objects.filter(category=old_name).update(category=new_name)
     return product_count, owned_count
 
 

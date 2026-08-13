@@ -134,9 +134,11 @@ class OwnedItemAdmin(admin.ModelAdmin):
         "name",
         "category",
         "purchase_date",
+        "buy_again",
+        "replacement",
     ]
-    list_filter = ["category"]
-    search_fields = ["name", "description", "notes", "category"]
+    list_filter = ["category", "buy_again"]
+    search_fields = ["name", "description", "notes", "category", "replacement__name"]
 
 
 @admin.register(PriceSnapshot)

@@ -242,6 +242,16 @@ class OwnedItem(models.Model):
 
     purchase_date = models.DateField("fecha de compra", null=True, blank=True)
     notes = models.TextField("notas", blank=True)
+    buy_again = models.BooleanField("comprar de nuevo", default=False)
+
+    replacement = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="owned_replacements",
+        verbose_name="siguiente compra",
+    )
 
     created_at = models.DateTimeField("creado", auto_now_add=True)
     updated_at = models.DateTimeField("actualizado", auto_now=True)

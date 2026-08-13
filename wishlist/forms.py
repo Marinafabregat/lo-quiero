@@ -267,6 +267,8 @@ class OwnedItemForm(forms.ModelForm):
             "image_url",
             "purchase_date",
             "notes",
+            "buy_again",
+            "replacement",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-field"}),
@@ -278,11 +280,20 @@ class OwnedItemForm(forms.ModelForm):
                 attrs={"class": "form-field", "type": "date"}
             ),
             "notes": forms.Textarea(attrs={"class": "form-field", "rows": 3}),
+            "buy_again": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+            "replacement": forms.Select(attrs={"class": "form-field"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._set_category_choices()
+        self._set_replacement_choices()
+
+    def _set_replacement_choices(self):
+        products = Product.objects.order_by("name").values_list("id", "name")
+        options = [("", "Sin sustituto")]
+        options.extend(products)
+        self.fields["replacement"].widget.choices = options
 
     def _set_category_choices(self):
         categories = list(all_categories())
