@@ -28,11 +28,11 @@ if not SECRET_KEY:
         secret_file.write_text(SECRET_KEY)
 
 # SECURITY WARNING: mantener DEBUG desactivado en producción.
-DEBUG = os.environ.get("DEBUG", "True").lower() in {"1", "true", "yes"}
+DEBUG = os.environ.get("DEBUG", "False").lower() in {"1", "true", "yes"}
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(
+    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(
         ","
     )
     if host.strip()
