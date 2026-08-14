@@ -570,6 +570,11 @@ def inventory_set_replacement(request, pk):
         item.buy_again = False
         product_id = request.POST.get("replacement", "")
         if product_id:
+            try:
+                product_id = int(product_id)
+            except (TypeError, ValueError):
+                messages.error(request, "Sustituto no válido.")
+                return redirect("inventory_list")
             replacement = get_object_or_404(Product, pk=product_id)
             item.replacement = replacement
             messages.success(

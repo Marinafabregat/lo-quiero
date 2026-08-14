@@ -63,6 +63,13 @@ class ProductFormTests(TestCase):
         product = form.save()
         self.assertEqual(product.waiting_days, 10)
 
+    def test_waiting_days_over_max_is_rejected(self):
+        form = ProductForm(
+            data=product_form_data(waiting_days="99999999999999999999999")
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("waiting_days", form.errors)
+
     def test_new_product_with_waiting_period_starts_waiting(self):
         form = ProductForm(
             data=product_form_data(current_price="100.00", status=Product.Status.NEW)

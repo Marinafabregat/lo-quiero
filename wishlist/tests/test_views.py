@@ -318,6 +318,17 @@ class InventoryViewsTests(TestCase):
         self.assertIsNone(item.replacement)
         self.assertFalse(item.buy_again)
 
+    def test_inventory_set_replacement_invalid_pk(self):
+        item = OwnedItem.objects.create(name="Auriculares con cable")
+        response = self.client.post(
+            reverse("inventory_set_replacement", args=[item.pk]),
+            {"replacement": "abc"},
+        )
+        self.assertEqual(response.status_code, 302)
+        item.refresh_from_db()
+        self.assertIsNone(item.replacement)
+        self.assertFalse(item.buy_again)
+
     def test_inventory_buy_again_marks_item(self):
         item = OwnedItem.objects.create(
             name="Mochila de trekking",

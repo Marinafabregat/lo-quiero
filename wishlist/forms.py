@@ -35,6 +35,7 @@ class ProductForm(forms.ModelForm):
     waiting_days = forms.IntegerField(
         label="Días de espera",
         min_value=0,
+        max_value=3650,  # mismo límite que product_postpone
         required=False,
         help_text=("Déjalo en blanco para usar los días sugeridos según el precio."),
     )
