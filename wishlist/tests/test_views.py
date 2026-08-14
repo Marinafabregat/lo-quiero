@@ -115,6 +115,29 @@ class ProductViewTests(TestCase):
             timezone.localdate() + timedelta(days=30),
         )
 
+    def test_postpone_review_clamps_overflow_days(self):
+        response = self.client.post(
+            reverse("product_postpone", args=[self.product.pk]),
+            {"days": "999999999999"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.product.refresh_from_db()
+        self.assertEqual(
+            self.product.review_date,
+            timezone.localdate() + timedelta(days=3650),
+        )
+
+    def test_postpone_review_invalid_days_defaults(self):
+        response = self.client.post(
+            reverse("product_postpone", args=[self.product.pk]), {"days": "abc"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.product.refresh_from_db()
+        self.assertEqual(
+            self.product.review_date,
+            timezone.localdate() + timedelta(days=7),
+        )
+
     def test_detail_shows_recommendation_from_last_review(self):
         DecisionReview.objects.create(
             product=self.product,

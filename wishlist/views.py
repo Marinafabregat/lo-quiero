@@ -258,8 +258,7 @@ def product_postpone(request, pk):
         days = int(request.POST.get("days", "7"))
     except (TypeError, ValueError):
         days = 7
-    if days < 1:
-        days = 7
+    days = min(max(days, 1), 3650)
     product.postpone(days)
     messages.success(request, f"Revisión de «{product.name}» pospuesta {days} días.")
     return redirect("product_detail", pk=pk)
