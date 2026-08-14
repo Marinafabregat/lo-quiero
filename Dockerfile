@@ -21,4 +21,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=3)" || exit 1
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "--insecure", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "--insecure", "127.0.0.1:8000"]

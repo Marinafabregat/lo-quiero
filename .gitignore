@@ -33,6 +33,7 @@ node_modules/
 # Editores
 .vscode/
 .idea/
+.opencode/
 
 # Sistema operativo
 .DS_Store
