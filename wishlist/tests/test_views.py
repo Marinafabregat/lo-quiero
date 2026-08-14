@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -326,6 +326,25 @@ class PageAccessTests(TestCase):
         ]:
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 200)
+
+
+class ErrorPageTests(TestCase):
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"])
+    def test_unknown_url_returns_custom_404(self):
+        response = self.client.get("/ruta-que-no-existe/")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Página no encontrada", status_code=404)
+
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"])
+    def test_unknown_product_returns_custom_404(self):
+        response = self.client.get(reverse("product_detail", args=[99999]))
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Página no encontrada", status_code=404)
+
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"])
+    def test_custom_404_offers_link_back(self):
+        response = self.client.get("/no-existe/")
+        self.assertContains(response, "Volver al panel", status_code=404)
 
 
 class CategoryManagementTests(TestCase):
